@@ -4,9 +4,11 @@ import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.service.TutorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
 
 import java.util.List;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/tutors")
 public class TutorController {
@@ -37,12 +39,12 @@ public class TutorController {
     }
 
     @PostMapping
-    public Tutor createTutor(@RequestBody Tutor tutor) {
+    public Tutor createTutor(@Valid @RequestBody Tutor tutor) {
         return tutorService.createTutor(tutor);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tutor> updateTutor(@PathVariable Long id, @RequestBody Tutor tutor) {
+    public ResponseEntity<Tutor> updateTutor(@PathVariable Long id,@Valid @RequestBody Tutor tutor) {
         Tutor updated = tutorService.updateTutor(id, tutor);
         if (updated != null) {
             return ResponseEntity.ok(updated);
@@ -52,6 +54,9 @@ public class TutorController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTutor(@PathVariable Long id) {
+        if (tutorService.getTutorById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
         tutorService.deleteTutor(id);
         return ResponseEntity.noContent().build();
     }

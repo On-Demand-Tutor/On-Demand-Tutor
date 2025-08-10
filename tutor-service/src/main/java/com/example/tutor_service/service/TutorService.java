@@ -40,6 +40,11 @@ public class TutorService {
                     t.setSkills(updatedTutor.getSkills());
                     t.setRating(updatedTutor.getRating());
                     t.setTeachingGrades(updatedTutor.getTeachingGrades());
+                    t.setName(updatedTutor.getName());
+                    t.setPrice(updatedTutor.getPrice());
+                    t.setAvailableTime(updatedTutor.getAvailableTime());
+                    t.setDescription(updatedTutor.getDescription());
+
                     return tutorRepository.save(t);
                 })
                 .orElse(null);
