@@ -99,6 +99,25 @@ services:
     networks:
       - my-network
 
+  rating_feedback_service:
+    build:
+      context: ./rating_feedback_service
+      dockerfile: Dockerfile
+    container_name: rating-feedback-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=rating_feedback_db
+      - DB_USER=root
+      - DB_PASSWORD=thuong2005
+    networks:
+      - my-network
+
+
 volumes:
   mysql_data:
 
