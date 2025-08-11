@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 
-
+import jakarta.persistence.Column;
 
 import jakarta.validation.constraints.*;
 
@@ -55,5 +55,16 @@ public class Tutor {
     @NotBlank(message = "Mô tả không được để trống")
     @Size(max = 1000, message = "Mô tả tối đa 1000 ký tự")
     private String description;
+
+    @Column(name = "promo_file")
+    private String promoFile;
+
+    // getters and setters
+    public String getPromoFile() {
+        return promoFile;
+    }
+    public void setPromoFile(String promoFile) {
+        this.promoFile = promoFile;
+    }
 }
 
