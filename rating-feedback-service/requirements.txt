@@ -1,4 +1,5 @@
-Django==4.2
+Django==5.2.5
 python-decouple
 djangorestframework
 psycopg2-binary
+mysqlclient>=2.2.0
