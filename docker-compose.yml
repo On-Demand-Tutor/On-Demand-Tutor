@@ -65,23 +65,6 @@ services:
     networks:
       - my-network
 
-  feedback-service:
-    build:
-      context: ./feedback-service
-      dockerfile: Dockerfile
-    container_name: feedback-service
-    ports:
-      - "8083:8080"
-    depends_on:
-      - mysql
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_feedback_service?createDatabaseIfNotExist=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-    networks:
-      - my-network
-
   admin-moderator-service:
     build:
       context: ./admin-moderator-service
@@ -98,6 +81,25 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
       - my-network
+
+  rating-feedback-service:
+    build:
+      context: ./rating-feedback-service
+      dockerfile: Dockerfile
+    container_name: rating-feedback-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=rating_feedback_db
+      - DB_USER=root
+      - DB_PASSWORD=123456
+    networks:
+      - my-network
+
 
 volumes:
   mysql_data:
