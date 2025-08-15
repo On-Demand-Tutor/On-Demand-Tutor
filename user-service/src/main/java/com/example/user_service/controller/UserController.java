@@ -22,10 +22,4 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserLoginRequest request) {
-        userService.login(request);
-        return ResponseEntity.ok("Đăng nhập thành công");
-    }
-
 }
