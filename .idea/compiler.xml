@@ -3,7 +3,7 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Annotation profile for feedback-service" enabled="true">
+      <profile name="Annotation profile for user-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -12,8 +12,8 @@
         </processorPath>
         <module name="student-service" />
         <module name="user-service" />
-        <module name="feedback-service" />
         <module name="tutor-service" />
+        <module name="feedback-service" />
         <module name="admin-moderator-service" />
       </profile>
     </annotationProcessing>
