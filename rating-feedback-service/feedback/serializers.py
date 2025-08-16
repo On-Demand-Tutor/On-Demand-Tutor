@@ -41,6 +41,7 @@ class RatingSerializer(serializers.ModelSerializer):
 
         # 4) Chỉ được đánh giá khi status = done
         if (data.get("status") or "").lower() != "done":
+            print(">>> DEBUG status fail:", data.get("status")) # In lỗi ra khi test fail
             raise serializers.ValidationError("Chỉ được đánh giá sau khi buổi học đã hoàn thành.")
 
         return attrs

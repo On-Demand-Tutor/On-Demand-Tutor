@@ -2,9 +2,9 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Rating(models.Model):
-    booking_id = models.IntegerField(null=True, blank=True)  # ID của booking bên service Booking
-    tutor_id = models.IntegerField()  # ID của tutor
-    student_id = models.IntegerField()  # ID của student
+    booking_id = models.UUIDField(null=True, blank=True)  # ID của booking bên service Booking
+    tutor_id = models.UUIDField()  # ID của tutor
+    student_id = models.UUIDField()  # ID của student
     score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])  # 1-5
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -26,8 +26,8 @@ class Rating(models.Model):
         return f"Tutor {self.tutor_id} - {self.score} stars"
 
 class Complaint(models.Model):
-    tutor_id = models.IntegerField()
-    student_id = models.IntegerField()
+    tutor_id = models.UUIDField()
+    student_id = models.UUIDField()
     description = models.TextField()
     status = models.CharField(
         max_length=20,
