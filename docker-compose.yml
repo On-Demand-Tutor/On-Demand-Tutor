@@ -99,9 +99,20 @@ services:
       - DB_NAME=rating_feedback_db
       - DB_USER=root
       - DB_PASSWORD=123456
+    volumes:
+      - ./rating-feedback-service:/app
     networks:
       - my-network
 
+  booking-service:
+    build:
+      context: ./booking-service
+      dockerfile: Dockerfile
+    container_name: booking-service
+    ports:
+      - "8001:8000"
+    networks:
+      - my-network
 
 volumes:
   mysql_data:
