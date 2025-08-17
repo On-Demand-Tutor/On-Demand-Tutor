@@ -3,10 +3,7 @@ package com.example.student_service.controller;
 import com.example.student_service.entity.Student;
 import com.example.student_service.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.security.PermitAll;
 
 import java.util.Map;
@@ -28,4 +25,17 @@ public class StudentController {
 
         return studentRepository.save(student);
     }
+
+    @PutMapping("/{userId}")
+    public Student updateStudent(@PathVariable Long userId, @RequestBody Map<String, Object> studentData) {
+        Student student = studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        if (studentData.get("grade") != null) {
+            student.setGrade(Integer.valueOf(studentData.get("grade").toString()));
+        }
+
+        return studentRepository.save(student);
+    }
+
 }
