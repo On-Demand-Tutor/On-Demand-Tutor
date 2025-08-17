@@ -3,10 +3,7 @@ package com.example.tutor_service.controller;
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -29,4 +26,23 @@ public class TutorController {
 
         return tutorRepository.save(tutor);
     }
+
+    @PutMapping("/{userId}")
+    public Tutor updateTutor(@PathVariable Long userId, @RequestBody Map<String, Object> tutorData) {
+        Tutor tutor = tutorRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Tutor not found"));
+
+        if (tutorData.get("qualifications") != null) {
+            tutor.setQualifications((String) tutorData.get("qualifications"));
+        }
+        if (tutorData.get("skills") != null) {
+            tutor.setSkills((String) tutorData.get("skills"));
+        }
+        if (tutorData.get("teachingGrades") != null) {
+            tutor.setTeachingGrades((String) tutorData.get("teachingGrades"));
+        }
+
+        return tutorRepository.save(tutor);
+    }
+
 }
