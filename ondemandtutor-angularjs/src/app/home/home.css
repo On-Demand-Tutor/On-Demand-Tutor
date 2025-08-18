@@ -1,0 +1,189 @@
+
+root {
+  --primary: #ff4081;
+  --text-light: #fff;
+}
+
+/* Nền toàn trang */
+.register-page {
+  height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Lớp overlay mờ để chữ dễ nhìn */
+.register-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+/* Header */
+header {
+  background: var(--primary);
+  color: var(--text-light);
+  padding: 10px 0;
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  margin: auto;
+}
+
+header .logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+header nav a {
+  color: var(--text-light);
+  text-decoration: none;
+}
+
+header nav a:hover {
+  text-decoration: underline;
+}
+
+/* Auth buttons in header */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-buttons a {
+  padding: 6px 14px;
+  border:1px solid #000;
+  background:#ffffff;
+  color:#000;
+  text-decoration: none;
+  border-radius:4px;
+  font-size:14px;
+}
+
+.auth-buttons a.btn-login{
+  background:#ff4081;   /* màu giống ảnh ví dụ */
+  border-color:#ff4081;
+  color:#000;
+}
+
+
+/* Hero section */
+.hero {
+  background:#f3f4f6;
+  padding:60px 0;
+  text-align:center;
+}
+
+.hero h2 {
+  font-size:32px;
+  margin-bottom:10px;
+}
+
+.hero p {
+  font-size:18px;
+  margin-bottom:20px;
+}
+
+.btn-primary {
+padding:10px 20px;
+border:none;
+cursor:pointer;
+}
+
+/* Features section */
+.features {
+  display:flex;
+  justify-content:space-around;
+  flex-wrap:wrap;
+  padding:40px 0;
+}
+
+.feature-item {
+  max-width:300px;
+  text-align:center;
+  margin:10px;
+}
+
+.feature-item h3 {
+  font-size:20px;
+  margin-bottom:8px;
+}
+
+/* CTA */
+.call-to-action {
+  text-align:center;
+  background:#e5e7eb;
+  padding:40px 0;
+}
+
+.call-to-action h2 {
+  font-size:28px;
+  margin-bottom:15px;
+}
+
+.btn-secondary {
+  padding:10px 20px;
+  border:none;
+  cursor:pointer;
+}
+
+/* Footer */
+footer{
+  background:#111827;
+  color:#ffffff;
+  padding:20px 0;
+  font-size:16px;
+}
+.footer-top{
+  display:flex;
+  justify-content:space-around;
+  width:90%;
+  margin:auto;
+  flex-wrap:wrap;
+}
+.footer-column{
+  display:flex;
+  flex-direction:column;
+  min-width:170px;
+  margin-bottom:20px;
+}
+.footer-column h4{
+  margin-bottom:10px;
+  font-weight:bold;
+  font-size:18px;
+}
+.footer-column a{
+  text-decoration:none;
+  color:#ffffff;
+  margin:4px 0;
+  font-size:15px;
+}
+
+.footer-column p{
+  max-width:300px;
+  line-height:1.5;
+  margin:6px 0;
+}
+
+.footer-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:90%;
+  margin:auto;
+  margin-top:15px;
+  font-size:15px;
+}

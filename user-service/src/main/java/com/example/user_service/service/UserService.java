@@ -1,0 +1,86 @@
+package com.example.user_service.service;
+
+
+import com.example.user_service.dto.request.UserCreateRequest;
+import com.example.user_service.dto.request.UserLoginRequest;
+import com.example.user_service.dto.response.UserResponse;
+import com.example.user_service.entity.User;
+import com.example.user_service.enums.UserRole;
+import com.example.user_service.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    private final RestTemplate restTemplate;
+
+    public UserResponse register(UserCreateRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại trong hệ thống");
+        }
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setUsername(request.getUsername());
+        user.setPassword(encodedPassword);
+        user.setRole(request.getRole());
+
+        User savedUser = userRepository.save(user);
+
+        if (savedUser.getRole() == UserRole.STUDENT) {
+            Map<String, Object> studentData = new HashMap<>();
+            studentData.put("userId", savedUser.getId());
+            studentData.put("grade", request.getGrade());
+
+            restTemplate.postForObject(
+                    "http://student-service:8080/api/students",
+                    studentData,
+                    Void.class
+            );
+        }
+
+        if (savedUser.getRole() == UserRole.TUTOR) {
+            Map<String, Object> tutorData = new HashMap<>();
+            tutorData.put("userId", savedUser.getId());
+            tutorData.put("qualifications", request.getQualifications());
+            tutorData.put("skills", request.getSkills());
+            tutorData.put("teachingGrades", request.getTeachingGrades());
+
+            restTemplate.postForObject(
+                    "http://tutor-service:8080/api/tutors",
+                    tutorData,
+                    Void.class
+            );
+        }
+
+        return UserResponse.builder()
+                .id(String.valueOf(savedUser.getId()))
+                .email(savedUser.getEmail())
+                .username(savedUser.getUsername())
+                .build();
+    }
+
+
+    public void login(UserLoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Email hoặc mật khẩu không đúng");
+        }
+    }
+
+}

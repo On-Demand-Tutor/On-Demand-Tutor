@@ -1,0 +1,31 @@
+package com.example.student_service.controller;
+
+import com.example.student_service.entity.Student;
+import com.example.student_service.repository.StudentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import jakarta.annotation.security.PermitAll;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/students")
+@RequiredArgsConstructor
+public class StudentController {
+
+    private final StudentRepository studentRepository;
+
+    @PostMapping
+    public Student createStudent(@RequestBody Map<String, Object> studentData) {
+        Student student = Student.builder()
+                .userId(Long.valueOf(studentData.get("userId").toString()))
+                .grade(studentData.get("grade") != null ?
+                        Integer.valueOf(studentData.get("grade").toString()) : 1)
+                .build();
+
+        return studentRepository.save(student);
+    }
+}
