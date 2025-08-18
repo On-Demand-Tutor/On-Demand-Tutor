@@ -7,9 +7,12 @@ import com.example.user_service.dto.request.UserUpdateRequest;
 import com.example.user_service.dto.response.UserResponse;
 import com.example.user_service.entity.User;
 import com.example.user_service.enums.UserRole;
+import com.example.user_service.event.StudentCreatedEvent;
+import com.example.user_service.event.TutorCreatedEvent;
 import com.example.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -23,8 +26,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
     private final RestTemplate restTemplate;
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public UserResponse register(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -41,30 +45,23 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
+        // 👇 Publish event sang 2 bên để dùng ROLE
         if (savedUser.getRole() == UserRole.STUDENT) {
-            Map<String, Object> studentData = new HashMap<>();
-            studentData.put("userId", savedUser.getId());
-            studentData.put("grade", request.getGrade());
-
-            restTemplate.postForObject(
-                    "http://student-service:8080/api/students",
-                    studentData,
-                    Void.class
+            StudentCreatedEvent event = new StudentCreatedEvent(
+                    savedUser.getId(),
+                    request.getGrade()
             );
+            kafkaTemplate.send("student-created", event);
         }
 
         if (savedUser.getRole() == UserRole.TUTOR) {
-            Map<String, Object> tutorData = new HashMap<>();
-            tutorData.put("userId", savedUser.getId());
-            tutorData.put("qualifications", request.getQualifications());
-            tutorData.put("skills", request.getSkills());
-            tutorData.put("teachingGrades", request.getTeachingGrades());
-
-            restTemplate.postForObject(
-                    "http://tutor-service:8080/api/tutors",
-                    tutorData,
-                    Void.class
+            TutorCreatedEvent event = new TutorCreatedEvent(
+                    savedUser.getId(),
+                    request.getQualifications(),
+                    request.getSkills(),
+                    request.getTeachingGrades()
             );
+            kafkaTemplate.send("tutor-created", event);
         }
 
         return UserResponse.builder()

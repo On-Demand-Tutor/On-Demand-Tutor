@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.example.user_service.exception.ErrorCode.UNCATEGORIZED_EXCEPTION;
+
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,8 +27,8 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiResponse> handleingRuntimeException(Exception exception){
         ApiResponse apiResponse=new ApiResponse();
 
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        apiResponse.setCode(UNCATEGORIZED_EXCEPTION.getCode());
+        apiResponse.setMessage(UNCATEGORIZED_EXCEPTION.getMessage());
 
         return ResponseEntity.badRequest()
                 .contentType(MediaType.APPLICATION_JSON)

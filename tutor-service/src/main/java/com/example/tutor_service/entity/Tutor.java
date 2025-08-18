@@ -21,4 +21,5 @@ public class Tutor {
     private String skills;
     private Double rating;
     private String teachingGrades;
+    private boolean isVerified;
 }
