@@ -42,7 +42,7 @@ def create_service(db: Session, service: schemas.ServiceCreate):
 def update_service(db: Session, service_id: int, service_update: dict):
     db_service = get_service(db, service_id)
     if db_service:
-        update_data = service_update.dict(exclude_unset=True)  # Chỉ lấy các trường được gửi lên
+        update_data = service_update.dict(exclude_unset=True) 
         for key, value in update_data.items():
             setattr(db_service, key, value)
         db.commit()
