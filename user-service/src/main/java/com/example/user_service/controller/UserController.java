@@ -24,7 +24,9 @@ public class UserController {
     @Operation(summary = "Đăng Kí", description = "Đăng kí user")
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody UserCreateRequest request) {
+        System.out.println("Đã gửi Kafka event=========================================================:");
         UserResponse response = userService.register(request);
+        System.out.println("Đã gửi Kafka event=========================================================:");
         return ResponseEntity.ok(response);
     }
 
