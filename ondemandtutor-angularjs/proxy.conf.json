@@ -20,7 +20,7 @@
     "changeOrigin": true
   },
   "/api/admin": {
-    "target": "http://localhost:8084",
+    "target": "http://localhost:8001",
     "secure": false,
     "changeOrigin": true
   }
