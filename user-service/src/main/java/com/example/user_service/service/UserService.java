@@ -52,6 +52,7 @@ public class UserService {
                     request.getGrade()
             );
             kafkaTemplate.send("student-created", event);
+            System.out.println("Đã gửi Kafka event=========================================================: " + event);
         }
 
         if (savedUser.getRole() == UserRole.TUTOR) {
@@ -62,6 +63,7 @@ public class UserService {
                     request.getTeachingGrades()
             );
             kafkaTemplate.send("tutor-created", event);
+            System.out.println("Đã gửi Kafka event:========================================================= " + event);
         }
 
         return UserResponse.builder()
