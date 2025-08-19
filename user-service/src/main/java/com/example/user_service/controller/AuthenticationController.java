@@ -6,8 +6,13 @@ import com.example.user_service.dto.request.RefreshRequest;
 import com.example.user_service.dto.request.UserLoginRequest;
 import com.example.user_service.dto.response.AuthenticationResponse;
 import com.example.user_service.service.AuthenticationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+
+@Tag(name = "Authentication", description = "API quản lý xác thực người dùng")
 
 @RequiredArgsConstructor
 @RestController
@@ -17,6 +22,7 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
+    @Operation(summary = "Đăng nhập", description = "Đăng nhập với username & password, trả về accessToken")
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> login(@RequestBody UserLoginRequest request) {
         var result = authenticationService.Login(request);
@@ -27,6 +33,8 @@ public class AuthenticationController {
                 .build();
     }
 
+
+    @Operation(summary = "Làm mới token", description = "Tạo accessToken mới từ refreshToken")
     @PostMapping("/refresh")
     public ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request) throws Exception {
         var result = authenticationService.refeshToken(request);
@@ -37,6 +45,7 @@ public class AuthenticationController {
                 .build();
     }
 
+    @Operation(summary = "Đăng xuất", description = "Xóa refreshToken khỏi hệ thống")
     @PostMapping("/logout")
     public ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws Exception {
         authenticationService.logout(request);

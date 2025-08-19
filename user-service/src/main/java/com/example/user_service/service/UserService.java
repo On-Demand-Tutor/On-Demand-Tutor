@@ -3,6 +3,7 @@ package com.example.user_service.service;
 
 import com.example.user_service.dto.request.UserCreateRequest;
 import com.example.user_service.dto.request.UserLoginRequest;
+import com.example.user_service.dto.request.UserUpdateRequest;
 import com.example.user_service.dto.response.UserResponse;
 import com.example.user_service.entity.User;
 import com.example.user_service.enums.UserRole;
@@ -72,6 +73,49 @@ public class UserService {
                 .username(savedUser.getUsername())
                 .build();
     }
+
+    public UserResponse updateUser(Long userId,UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.getUsername() != null) user.setUsername(request.getUsername());
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        userRepository.save(user);
+
+        if (user.getRole() == UserRole.STUDENT) {
+            Map<String, Object> studentData = new HashMap<>();
+            studentData.put("userId", user.getId());
+            studentData.put("grade", request.getGrade());
+
+            restTemplate.put(
+                    "http://student-service:8080/api/students/" + userId,
+                    studentData
+            );
+        }
+
+        if (user.getRole() == UserRole.TUTOR) {
+            Map<String, Object> tutorData = new HashMap<>();
+            tutorData.put("userId", user.getId());
+            tutorData.put("qualifications", request.getQualifications());
+            tutorData.put("skills", request.getSkills());
+            tutorData.put("teachingGrades", request.getTeachingGrades());
+
+            restTemplate.put(
+                    "http://tutor-service:8080/api/tutors/" +userId,
+                    tutorData
+            );
+        }
+
+        return UserResponse.builder()
+                .id(String.valueOf(user.getId()))
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+    }
+
 
 
     public void login(UserLoginRequest request) {
