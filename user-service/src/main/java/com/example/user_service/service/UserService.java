@@ -28,7 +28,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RestTemplate restTemplate;
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     public UserResponse register(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -45,14 +46,14 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        // 👇 Publish event sang 2 bên để dùng ROLE
+        //Publish event sang 2 bên để dùng ROLE rồi check thôi kkk
         if (savedUser.getRole() == UserRole.STUDENT) {
             StudentCreatedEvent event = new StudentCreatedEvent(
                     savedUser.getId(),
                     request.getGrade()
             );
             kafkaTemplate.send("student-created", event);
-            System.out.println("Đã gửi Kafka event=========================================================: " + event);
+            System.out.println("Đã gửi Kafka event tới Student=========================================================: " + event);
         }
 
         if (savedUser.getRole() == UserRole.TUTOR) {
@@ -63,7 +64,7 @@ public class UserService {
                     request.getTeachingGrades()
             );
             kafkaTemplate.send("tutor-created", event);
-            System.out.println("Đã gửi Kafka event:========================================================= " + event);
+            System.out.println("Đã gửi Kafka event tới Tutor:========================================================= " + event);
         }
 
         return UserResponse.builder()
@@ -113,17 +114,6 @@ public class UserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .build();
-    }
-
-
-
-    public void login(UserLoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng"));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Email hoặc mật khẩu không đúng");
-        }
     }
 
 }

@@ -16,6 +16,7 @@ public class StudentConsumer {
 
     @KafkaListener(topics = "student-created", groupId = "student-service-group")
     public void consumeStudentCreated(StudentCreatedEvent event) {
+        System.out.println("Student Nhận được event từ Kafka rồi nhé ok ok ++++>>>: " + event);
         Student student = Student.builder()
                 .userId(event.getUserId())
                 .grade(event.getGrade())

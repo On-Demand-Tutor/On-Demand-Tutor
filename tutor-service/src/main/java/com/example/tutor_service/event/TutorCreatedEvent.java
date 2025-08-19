@@ -11,4 +11,5 @@ public class TutorCreatedEvent {
     private Long userId;
     private String qualifications;
     private String skills;
+    private String teachingGrades;
 }
