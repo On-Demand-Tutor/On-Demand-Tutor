@@ -1,0 +1,120 @@
+<header>
+  <div class="container">
+    <h1 class="logo">On-Demand-Tutor</h1>
+    <nav>
+      <ul>
+        <li><a href="home">Trang chủ </a></li>
+        <li><a href="tutors">Tìm gia sư </a></li>
+        <li><a href="about">Về chúng tôi </a></li>
+        <li><a href="contact">Liên hệ</a></li>
+      </ul>
+    </nav>
+
+  
+      <!-- Avatar with dropdown -->
+      <div class="avatar-menu">
+        <img
+          src="https://scontent.fsgn5-8.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s40x40&_nc_cat=1&_nc_sid=f5662c&_nc_ohc=tt8z1knDr6oQ7kNvwFjQZQP&_nc_oc=Adk5B7vST1kxheuDFvqXNcGF0AT-StYQlRAF_N5nEtnIsX2Q8quYivqMwcI7E2Rzf1s&_nc_zt=24&_nc_ht=scontent.fsgn5-8.fna&oh=00_AfUR6sbbnNPL0DBOS2edROl-_BZrbtGnFvF5NT6apAaLkQ&oe=68CB583A"
+          class="auth-avatar"
+          alt="Avatar"
+          (click)="toggleAvatarMenu()"
+        />
+
+        
+      
+    </div>
+  </div>
+</header>
+
+<main class="profile-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="profile-avatar">
+      <img src="https://scontent.fsgn5-8.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s40x40&_nc_cat=1&_nc_sid=f5662c&_nc_ohc=tt8z1knDr6oQ7kNvwFjQZQP&_nc_oc=Adk5B7vST1kxheuDFvqXNcGF0AT-StYQlRAF_N5nEtnIsX2Q8quYivqMwcI7E2Rzf1s&_nc_zt=24&_nc_ht=scontent.fsgn5-8.fna&oh=00_AfUR6sbbnNPL0DBOS2edROl-_BZrbtGnFvF5NT6apAaLkQ&oe=68CB583A" alt="User Avatar" />
+      <h3>{{ fullName }}</h3>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Work</a></li>
+      <li><a (click)="logout()">Signout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Content -->
+  <section class="profile-content">
+    <div class="card">
+      <h2>About</h2>
+      <form class="edit-form" (ngSubmit)="updateProfile()">
+        <label>
+          Full Name
+          <input type="text" name="fullName" [(ngModel)]="fullName" required />
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" [(ngModel)]="email" required />
+        </label>
+        <label>
+          Phone
+          <input type="text" name="phone" [(ngModel)]="phone" />
+        </label>
+        <label>
+          Address
+          <input type="text" name="address" [(ngModel)]="address" />
+        </label>
+        <button type="submit" [disabled]="isLoading">
+          {{ isLoading ? 'Đang lưu...' : 'Save Changes' }}
+        </button>
+        <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+        <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Recent Projects</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Project Name</th>
+            <th>Project Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Project 1</td>
+            <td>Online Tutor Matching</td>
+          </tr>
+          <tr>
+            <td>Project 2</td>
+            <td>Learning Management System</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-column">
+      <h1 class="logo">On-Demand-Tutor</h1>
+      <p>Nền tảng kết nối gia sư và học viên hàng đầu Việt Nam.</p>
+    </div>
+    <div class="footer-column">
+      <h4>Giới thiệu</h4>
+      <a href="#">Giới thiệu về chúng tôi</a>
+      <a href="#">Liên hệ với chúng tôi</a>
+    </div>
+    <div class="footer-column">
+      <h4>Chính sách & Điều khoản</h4>
+      <a href="#">Chính sách về quyền riêng tư</a>
+      <a href="#">Điều khoản</a>
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="footer-bottom">
+    <div class="logo">&copy; 2025 On-Demand-Tutor, Inc.</div>
+    <div class="language">🌐 Tiếng Việt</div>
+  </div>
+</footer>

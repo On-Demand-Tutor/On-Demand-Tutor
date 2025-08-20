@@ -7,11 +7,11 @@ LABEL authors="congng"
 # Tạo thư mục làm việc trong container
 WORKDIR /app
 
-# Sao chép tệp JAR vào container
-COPY target/student-service-0.0.1-SNAPSHOT.jar /app/student-service-0.0.1-SNAPSHOT.jar
+# Sao chép tệp JAR (không cần ghi cứng tên)
+COPY target/*.jar app.jar
 
 # Expose port của ứng dụng
 EXPOSE 8080
 
 # Câu lệnh để chạy ứng dụng
-ENTRYPOINT ["java", "-jar", "/app/student-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

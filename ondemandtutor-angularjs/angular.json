@@ -71,7 +71,8 @@
               "buildTarget": "ondemandtutor-angularjs:build:production"
             },
             "development": {
-              "buildTarget": "ondemandtutor-angularjs:build:development"
+              "buildTarget": "ondemandtutor-angularjs:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
