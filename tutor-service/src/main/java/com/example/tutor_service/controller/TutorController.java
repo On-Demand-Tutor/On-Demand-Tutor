@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*")
@@ -36,6 +37,23 @@ public class TutorController {
     @GetMapping
     public List<Tutor> getAllTutors() {
         return tutorService.getAllTutors();
+    }
+     @PutMapping("/{userId}")
+    public Tutor updateTutor(@PathVariable Long userId, @RequestBody Map<String, Object> tutorData) {
+        Tutor tutor = tutorRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Tutor not found"));
+
+        if (tutorData.get("qualifications") != null) {
+            tutor.setQualifications((String) tutorData.get("qualifications"));
+        }
+        if (tutorData.get("skills") != null) {
+            tutor.setSkills((String) tutorData.get("skills"));
+        }
+        if (tutorData.get("teachingGrades") != null) {
+            tutor.setTeachingGrades((String) tutorData.get("teachingGrades"));
+        }
+
+        return tutorRepository.save(tutor);
     }
 
     @GetMapping("/{id}")
