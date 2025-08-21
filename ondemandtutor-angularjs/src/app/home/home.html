@@ -1,75 +1,83 @@
+<header>
+  <div class="container">
+    <h1 class="logo">On-Demand-Tutor</h1>
+    <nav>
+      <ul>
+        <li><a href="home">Trang chủ </a></li>
+        <li><a href="tutors">Tìm gia sư </a></li>
+        <li><a href="about">Về chúng tôi </a></li>
+        <li><a href="contact">Liên hệ</a></li>
+      </ul>
+    </nav>
 
+    <div class="auth-buttons">
+      <a href="register" class="btn-register">Đăng ký</a>
+      <a href="login" class="btn-login">Đăng nhập</a>
 
-<!-- Header  -->
-  <header>
-    <div class="container">
-      <h1 class="logo">On-Demand-Tutor</h1>
-      <nav>
-        <ul>
-          <li><a href="home">Trang chủ</a></li>
-          <li><a href="tutors">Tìm gia sư</a></li>
-          <li><a href="about">Về chúng tôi</a></li>
-          <li><a href="contact">Liên hệ</a></li>
+      <!-- Avatar with dropdown -->
+      <div class="avatar-menu">
+        <img 
+          src="https://scontent.fsgn5-8.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s40x40&_nc_cat=1&_nc_sid=f5662c&_nc_ohc=tt8z1knDr6oQ7kNvwFjQZQP&_nc_oc=Adk5B7vST1kxheuDFvqXNcGF0AT-StYQlRAF_N5nEtnIsX2Q8quYivqMwcI7E2Rzf1s&_nc_zt=24&_nc_ht=scontent.fsgn5-8.fna&oh=00_AfUR6sbbnNPL0DBOS2edROl-_BZrbtGnFvF5NT6apAaLkQ&oe=68CB583A" 
+          class="auth-avatar" 
+          alt="Avatar"
+          (click)="toggleAvatarMenu()"/>
 
+        <ul class="dropdown" *ngIf="isAvatarMenuOpen">
+          <li><a routerLink="/profile">Profile</a></li>
+          <li><a routerLink="/settings">Settings</a></li>
+          <li><a (click)="logout()">Logout</a></li>
         </ul>
-      </nav>
-          <div class="auth-buttons">
-            <a href="register" class="btn-register">Đăng ký</a>
-            <a href="login" class="btn-login">Đăng nhập</a>
-
-          </div>
+      </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h2>Tìm gia sư theo yêu cầu một cách nhanh chóng</h2>
-      <p> Kết nối với người dạy phù hợp với nhu cầu học tập của bạn chỉ với vài cú nhấp chuột. </p>
-      <button class="btn-primary">Bắt đầu ngay</button>
-    </div>
-  </section>
+<section class="hero-section">
+  <div class="container">
+    <h1>Học tập hiệu quả,<br> cùng gia sư chuyên nghiệp.</h1>
+    <p>Tìm kiếm gia sư lý tưởng cho mọi môn học và mọi trình độ. Học trực tuyến dễ dàng mọi lúc, mọi nơi.</p>
+    <a href="tutors" class="btn-primary">Tìm gia sư ngay</a>
+  </div>
+</section>
 
-  <!-- Feature Section -->
-  <section class="features">
-    <div class="feature-item">
-      <h3>Đa dạng môn học</h3>
-      <p>Lựa chọn từ hàng trăm gia sư ở mọi trình độ và lĩnh vực.</p>
-    </div>
-    <div class="feature-item">
-      <h3>Lọc theo yêu cầu</h3>
-      <p>Tìm đúng gia sư phù hợp với trình độ và thời gian của bạn.</p>
-    </div>
-    <div class="feature-item">
-      <h3>Đánh giá minh bạch</h3>
-      <p>Xem đánh giá từ các học viên khác trước khi lựa chọn.</p>
-    </div>
-  </section>
+<section class="features">
+  <div class="feature-item">
+    <h3>Dễ dàng tìm kiếm</h3>
+    <p>Hệ thống lọc thông minh giúp bạn tìm gia sư phù hợp chỉ trong vài giây.</p>
+  </div>
+  <div class="feature-item">
+    <h3>Đa dạng môn học</h3>
+    <p>Lựa chọn từ hàng trăm gia sư ở mọi trình độ và lĩnh vực.</p>
+  </div>
+  <div class="feature-item">
+    <h3>Lọc theo yêu cầu</h3>
+    <p>Tìm đúng gia sư phù hợp với trình độ và thời gian của bạn.</p>
+  </div>
+  <div class="feature-item">
+    <h3>Đánh giá minh bạch</h3>
+    <p>Xem đánh giá từ các học viên khác trước khi lựa chọn.</p>
+  </div>
+</section>
 
-  <!-- Call to action -->
-  <section class="call-to-action">
-    <h2>Gia sư sẵn sàng hỗ trợ bạn</h2>
-    <button class="btn-secondary">Khám phá ngay</button>
-  </section>
+<section class="call-to-action">
+  <h2>Gia sư sẵn sàng hỗ trợ bạn</h2>
+  <a href="/explore" class="btn-secondary">Khám phá ngay</a>
+</section>
 
-<!-- Footer -->
 <footer>
   <div class="footer-top">
-    <!-- Cột 1: Logo + mô tả -->
     <div class="footer-column">
       <h1 class="logo">On-Demand-Tutor</h1>
       <p>Nền tảng kết nối gia sư và học viên hàng đầu Việt Nam.<br/>
         Chúng tôi cam kết mang đến trải nghiệm học tập tốt nhất cho bạn.</p>
     </div>
 
-    <!-- Cột 2: Giới thiệu -->
     <div class="footer-column">
       <h4>Giới thiệu</h4>
       <a href="#">Giới thiệu về chúng tôi</a>
       <a href="#">Liên hệ với chúng tôi</a>
     </div>
 
-    <!-- Cột 3: Chính sách & Điều khoản -->
     <div class="footer-column">
       <h4>Chính sách & Điều khoản</h4>
       <a href="#">Chính sách về quyền riêng tư</a>

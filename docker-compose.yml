@@ -71,14 +71,15 @@ services:
       dockerfile: Dockerfile
     container_name: admin-moderator-service
     ports:
-      - "8084:8080"
+      - "8001:8000"
     depends_on:
       - mysql
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_moderator_service?createDatabaseIfNotExist=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=AdminDB
+      - DB_USER=root
+      - DB_PASSWORD=123456
     networks:
       - my-network
 
