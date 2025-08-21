@@ -25,8 +25,9 @@ export class ProfileComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
-    // Hàm này bây giờ sẽ hoạt động đúng
-    this.authService.getCurrentUser().subscribe({
+    // Load user data
+    const userId = Number(localStorage.getItem('userId'));
+    this.authService.getUserById(userId).subscribe({
       next: (user) => {
         this.fullName = user.fullName || '';
         this.email = user.email || '';
@@ -68,8 +69,10 @@ export class ProfileComponent implements OnInit {
       address: this.address
     };
 
-    // Hàm này đã hoạt động đúng vì auth.ts đã được sửa
-    this.authService.updateProfile(updatedUser).subscribe({
+    // 👉 Lấy id từ localStorage để truyền vào updateProfile
+    const userId = Number(localStorage.getItem('userId'));
+
+    this.authService.updateProfile(userId, updatedUser).subscribe({
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Cập nhật thành công!';

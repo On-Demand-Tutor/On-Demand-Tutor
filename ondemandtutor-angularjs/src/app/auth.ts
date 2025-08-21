@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
+  // base URL (không chứa /update/{id} sẵn)
   private apiUrl = '/api/users';
 
   constructor(private http: HttpClient) {}
@@ -14,27 +15,23 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/register`, user);
   }
 
-  // ✅ Đã xóa `responseType: 'text'`
   login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+    return this.http.post(`${this.apiUrl}/login`, credentials, { responseType: 'text' });
   }
 
-  // ✅ Đã thêm hàm getCurrentUser()
-  getCurrentUser(): Observable<any> {
-    // Gọi API để lấy thông tin người dùng hiện tại
-    return this.http.get(`${this.apiUrl}/me`);
+  // Lấy user theo id
+  getUserById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}`);
   }
 
-  // ✅ Cập nhật hồ sơ người dùng
-  updateProfile(userData: any): Observable<any> {
-    // Gọi API để cập nhật thông tin người dùng hiện tại
-    return this.http.put(`${this.apiUrl}/me`, userData);
+  // Cập nhật user: PUT /api/users/update/{id}
+  updateProfile(id: number, userData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update/${id}`, userData);
   }
 
-  // ✅ Đăng xuất
   logout(): void {
     localStorage.removeItem('authToken');
-    localStorage.removeItem('userId'); // Có thể bạn đã bỏ lỡ dòng này
+    localStorage.removeItem('userId');
     console.log('User logged out');
   }
 }
