@@ -21,5 +21,8 @@ public class Tutor {
     private String skills;
     private Double rating;
     private String teachingGrades;
-//    private boolean isVerified;
+
+    @Column(nullable = false)
+    private boolean isVerified = false;
+
 }

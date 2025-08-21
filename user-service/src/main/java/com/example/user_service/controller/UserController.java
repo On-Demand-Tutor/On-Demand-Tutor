@@ -30,10 +30,7 @@ public class UserController {
 
     @Operation(summary = "Cập nhật", description = "Cập nhật thông tin user")
     @PutMapping("/update/{id}")
-    public ResponseEntity<UserResponse> updateUser(
-            @PathVariable Long id,
-            @RequestBody UserUpdateRequest request
-    ) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
         UserResponse updatedUser = userService.updateUser(id,request);
         return ResponseEntity.ok(updatedUser);
     }

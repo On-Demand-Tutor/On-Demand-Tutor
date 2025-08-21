@@ -3,6 +3,7 @@ package com.example.tutor_service.consumer;
 
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.TutorCreatedEvent;
+import com.example.tutor_service.event.TutorUpdatedEvent;
 import com.example.tutor_service.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class TutorConsumer {
     private final TutorRepository tutorRepository;
 
-    @KafkaListener(topics = "tutor-created", groupId = "tutor-service-group",containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "tutor-created", groupId = "tutor-service-group",containerFactory = "kafkaListenerContainerFactoryForCreateTutor")
     public void consumeTutorCreated(TutorCreatedEvent event) {
         System.out.println("Tutor Nhận được event từ Kafka rồi nhé ok ok ++++>>>: " + event);
         Tutor tutor = Tutor.builder()
@@ -26,4 +27,23 @@ public class TutorConsumer {
                 .build();
         tutorRepository.save(tutor);
     }
+
+    @KafkaListener(topics = "tutor-updated", groupId = "tutor-service-group", containerFactory = "kafkaListenerContainerFactoryForUpdateTutor")
+    public void consumeTutorUpdated(TutorUpdatedEvent event) {
+        System.out.println("Tutor Nhận được event update từ Kafka rồi nhé ok ok ++++>>>: " + event);
+
+        Tutor tutor = tutorRepository.findByUserId(event.getUserId())
+                .orElseThrow(() -> new RuntimeException("Tutor not found with userId: " + event.getUserId()));
+        if (event.getQualifications() != null) {
+            tutor.setQualifications(event.getQualifications());
+        }
+        if (event.getSkills() != null) {
+            tutor.setSkills(event.getSkills());
+        }
+        if (event.getTeachingGrades() != null) {
+            tutor.setTeachingGrades(event.getTeachingGrades());
+        }
+        tutorRepository.save(tutor);
+    }
+
 }
