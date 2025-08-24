@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserRole {
+public class UserrRole {
     @Id
     private String name;
     private String description;
