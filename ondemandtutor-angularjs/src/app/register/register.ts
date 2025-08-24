@@ -24,23 +24,12 @@ export class RegisterComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  register() {
-    // Validate input - kiểm tra thông tin đầu vào
+ register() {
     if (!this.email || !this.username || !this.password) {
       this.errorMessage = 'Please fill in all required fields';
       return;
-    }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.email)) {
-      this.errorMessage = 'Please enter a valid email address';
-      return;
     }
-
-    // Clear error message và bắt đầu loading
-    this.errorMessage = '';
-    this.isLoading = true;
 
     const newUser = {
       email: this.email,
@@ -49,32 +38,28 @@ export class RegisterComponent {
       role: this.role
     };
 
+    this.errorMessage = '';
+    this.isLoading = true;
+
     this.authService.register(newUser).subscribe({
-      next: () => {
+      next: (res) => {
         this.isLoading = false;
         this.registrationSuccess = true;
-      },
-      error: err => {
-        this.isLoading = false;
 
-        // Handle different types of errors
-        if (err && err.error) {
-          if (typeof err.error === 'string') {
-            this.errorMessage = err.error;
-          } else if (err.error.message) {
-            this.errorMessage = err.error.message;
-          } else if (err.status === 409) {
-            this.errorMessage = 'Email or username already exists';
-          } else if (err.status === 400) {
-            this.errorMessage = 'Invalid registration data';
-          } else {
-            this.errorMessage = 'Registration failed. Please try again.';
-          }
+        // Nếu BE trả về token → lưu token và login luôn
+        if (res.token) {
+          this.authService.setToken(res.token);
+          this.router.navigate(['/home']);
         } else {
-          this.errorMessage = 'Network error. Please check your connection and try again.';
+          // Nếu BE chỉ tạo user mà không trả token → quay về login
+          setTimeout(() => this.router.navigate(['/login']), 2000);
         }
-
-        console.error('Registration failed:', err);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage =
+          err.error?.message ||
+          'Registration failed. Please try again.';
       }
     });
   }

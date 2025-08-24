@@ -42,23 +42,6 @@ public class TutorController {
     public List<Tutor> getAllTutors() {
         return tutorService.getAllTutors();
     }
-     @PutMapping("/{userId}")
-    public Tutor updateTutor(@PathVariable Long userId, @RequestBody Map<String, Object> tutorData) {
-        Tutor tutor = tutorRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Tutor not found"));
-
-        if (tutorData.get("qualifications") != null) {
-            tutor.setQualifications((String) tutorData.get("qualifications"));
-        }
-        if (tutorData.get("skills") != null) {
-            tutor.setSkills((String) tutorData.get("skills"));
-        }
-        if (tutorData.get("teachingGrades") != null) {
-            tutor.setTeachingGrades((String) tutorData.get("teachingGrades"));
-        }
-
-        return tutorRepository.save(tutor);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Tutor> getTutorById(@PathVariable Long id) {

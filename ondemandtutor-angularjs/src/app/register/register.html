@@ -13,10 +13,11 @@
 </header>
 
 <div class="register-page">
+  <!-- Form đăng ký -->
   <div class="auth-container" *ngIf="!registrationSuccess">
     <h2>Register</h2>
     <form (ngSubmit)="register()">
-      <!-- Hiển thị thông báo lỗi -->
+      <!-- Thông báo lỗi -->
       <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}
       </div>
@@ -24,23 +25,31 @@
       <input type="email" placeholder="Email" required [(ngModel)]="email" name="email">
       <input type="text" placeholder="Username" required [(ngModel)]="username" name="username">
       <input type="password" placeholder="Password" required [(ngModel)]="password" name="password">
+
       <select [(ngModel)]="role" name="role">
         <option value="STUDENT">Student</option>
         <option value="TUTOR">Tutor</option>
         <option value="MODERATOR">Moderator</option>
       </select>
-      <button type="submit">Register</button>
-      <p>Đã có tài khoản? <a href="/login">Đăng nhập</a></p>
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Registering...' : 'Register' }}
+      </button>
+      <p>Đã có tài khoản? <a routerLink="/login">Đăng nhập</a></p>
     </form>
   </div>
 
+  <!-- Khi đăng ký thành công -->
   <div class="auth-container" *ngIf="registrationSuccess">
     <div style="text-align: center;">
       <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="#4CAF50">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
       </svg>
       <h2>Registration Successful!</h2>
-      <p>We've sent a verification email to <b>{{ email }}</b>. Please check your inbox and click the verification link to activate your account.</p>
+      <p>
+        Your account has been created with role <b>{{ role }}</b>.<br/>
+        Redirecting to login...
+      </p>
       <button (click)="goToLogin()">Continue to Login</button>
     </div>
   </div>
