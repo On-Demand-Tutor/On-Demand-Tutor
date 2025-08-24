@@ -92,15 +92,28 @@ services:
       - "8000:8000"
     depends_on:
       - mysql
+    env_file:
+      - ./rating-feedback-service/.env
     environment:
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_NAME=rating_feedback_db
       - DB_USER=root
       - DB_PASSWORD=123456
+    volumes:
+      - ./rating-feedback-service:/app
     networks:
       - my-network
 
+  booking-service:
+    build:
+      context: ./booking-service
+      dockerfile: Dockerfile
+    container_name: booking-service
+    ports:
+      - "8001:8000"
+    networks:
+      - my-network
 
 volumes:
   mysql_data:

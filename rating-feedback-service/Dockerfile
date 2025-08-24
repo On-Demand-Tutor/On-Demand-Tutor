@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
 
 # Tạo thư mục làm việc
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 
 # Copy file requirements trước để cache pip install
 COPY requirements.txt .
