@@ -1,6 +1,7 @@
 package com.example.tutor_service.configuration;
 
 
+import com.example.tutor_service.dto.request.SearchTutorRequest;
 import com.example.tutor_service.event.TutorCreatedEvent;
 import com.example.tutor_service.event.TutorUpdatedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -51,6 +52,11 @@ public class KafkaConsumerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, TutorUpdatedEvent> kafkaListenerContainerFactoryForUpdateTutor() {
         return kafkaListenerContainerFactory(TutorUpdatedEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, SearchTutorRequest> kafkaListenerContainerFactoryForSearchTutor() {
+        return kafkaListenerContainerFactory(SearchTutorRequest.class);
     }
 
 }
