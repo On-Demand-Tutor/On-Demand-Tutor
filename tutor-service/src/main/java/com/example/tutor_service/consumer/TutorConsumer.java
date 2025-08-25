@@ -61,11 +61,14 @@ public class TutorConsumer {
     public void handleSearchTutor(SearchTutorRequest request) {
         System.out.println("Nhận event từ student-service: " + request);
 
-        int page=request.getPage();
-        int size=request.getSize();
+        tutorService.searchAndSendTutors(
+                request.getRequestId(),
+                request.getKeyword(),
+                request.getPage(),
+                request.getSize()
+        );
 
-        SearchTutorResponse result = tutorService.searchTutorsWithPagination(request.getKeyword(), page, size);
-
-        tutorService.sendSearchResponse(request.getRequestId(), result.getTutors(), result.getTotalElements());
+        System.out.println("Đã xử lý và gửi response về student-service với requestId=" + request.getRequestId());
     }
+
 }

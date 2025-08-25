@@ -6,6 +6,8 @@ import com.example.student_service.entity.Student;
 import com.example.student_service.event.StudentCreatedEvent;
 import com.example.student_service.event.StudentUpdatedEvent;
 import com.example.student_service.repository.StudentRepository;
+import com.example.student_service.service.StudentService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,9 @@ import org.springframework.stereotype.Service;
 public class StudentConsumer {
 
     private final StudentRepository studentRepository;
+
+    private final StudentService studentService;
+
 
     @KafkaListener(topics = "student-created", groupId = "student-service-group",containerFactory = "kafkaListenerContainerFactoryForcreateStudent")
     public void consumeStudentCreated(StudentCreatedEvent event) {
@@ -39,6 +44,24 @@ public class StudentConsumer {
         studentRepository.save(student);
     }
 
+    // @KafkaListener(topics = "search-tutor-response", groupId = "student-service-group", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
+    // public void consumeSearchTutor(SearchTutorResponse event) {
+    //     System.out.println("Student Nhận được event search từ Kafka rồi nhé ok ok ++++>>>: " + event);
+    //     if (event != null && event.getTutors() != null) {
+    //         System.out.println("Số lượng tutor tìm được: " + event.getTutors().size());
+    //         System.out.println("Tổng số tutor trong DB: " + event.getTotalElements());
+
+    //         event.getTutors().forEach(tutor -> {
+    //             System.out.println("Tutor ID: " + tutor.getUserId() +
+    //                     ", Skills: " + tutor.getSkills() +
+    //                     ", Rating: " + tutor.getRating());
+    //         });
+    //     } else {
+    //         System.out.println("Không tìm thấy tutor nào!");
+    //     }
+
+    // }
+
     @KafkaListener(topics = "search-tutor-response", groupId = "student-service-group", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
     public void consumeSearchTutor(SearchTutorResponse event) {
         System.out.println("Student Nhận được event search từ Kafka rồi nhé ok ok ++++>>>: " + event);
@@ -55,6 +78,9 @@ public class StudentConsumer {
             System.out.println("Không tìm thấy tutor nào!");
         }
 
+
+        // đẩy response về service để complete future
+        studentService.handleSearchTutorResponse(event);
     }
 
 

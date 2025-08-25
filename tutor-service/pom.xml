@@ -31,6 +31,20 @@
 	</properties>
 	<dependencies>
 
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.5.5.Final</version> <!-- Chọn phiên bản phù hợp với dự án của bạn -->
+		</dependency>
+
+		<!-- Dependency để MapStruct có thể biên dịch các Mapper -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-processor</artifactId>
+			<version>1.5.5.Final</version> <!-- Chọn phiên bản phù hợp với dự án của bạn -->
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka -->
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>

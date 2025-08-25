@@ -14,10 +14,10 @@ public class StudentController {
     private final StudentService studentService;
 
     @PostMapping("/search-tutor")
-    public SearchTutorResponse searchTutor(@RequestBody SearchTutorRequest request) {
+    public SearchTutorResponse searchTutor(@RequestBody SearchTutorRequest request) throws Exception {
         SearchTutorResponse response = studentService.searchTutorByNameOrSkill(request);
 
-        System.out.println("✅ Đã gửi request search tutor với từ khóa: " + request.getKeyword());
+        System.out.println("✅ Đã gửi request search tutor ở student controller với từ khóa: " + request.getKeyword());
         System.out.println("👉 Kết quả search: " + response);
 
         return response;

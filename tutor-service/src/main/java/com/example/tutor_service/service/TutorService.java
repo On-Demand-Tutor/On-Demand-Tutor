@@ -21,18 +21,18 @@ public class TutorService {
 
     private final TutorRepository tutorRepository;
 
-    public SearchTutorResponse searchTutorsWithPagination(String keyword, int page, int size) {
+    public void searchAndSendTutors(String requestId, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Tutor> tutorPage = tutorRepository.findBySkillsContainingOrQualificationsContaining(keyword, keyword, pageable);
+        Page<Tutor> tutorPage = tutorRepository.findBySkillsContaining(keyword, pageable);
 
-        List<Tutor> tutors = tutorPage.getContent();
+        SearchTutorResponse response = new SearchTutorResponse();
+        response.setRequestId(requestId);
+        response.setTutors(tutorPage.getContent());
+        response.setTotalElements(tutorPage.getTotalElements());
 
-        return new SearchTutorResponse(tutors, tutorPage.getTotalElements());
-    }
-
-    public void sendSearchResponse(String requestId, List<Tutor> tutors, long totalElements) {
-        SearchTutorResponse response = new SearchTutorResponse(tutors, totalElements);
         kafkaTemplate.send("search-tutor-response", response);
         System.out.println("Đã gửi response sang student-service: " + response);
     }
+
+
 }

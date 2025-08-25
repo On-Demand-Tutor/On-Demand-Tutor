@@ -13,5 +13,5 @@ public interface TutorRepository extends JpaRepository<Tutor,Long> {
 
     Optional<Tutor> findByUserId(Long userId);
 
-    Page<Tutor> findBySkillsContainingOrQualificationsContaining(String keyword, String keyword1, Pageable pageable);
+    Page<Tutor> findBySkillsContaining(String keyword, Pageable pageable);
 }

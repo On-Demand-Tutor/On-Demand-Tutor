@@ -11,6 +11,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchTutorResponse {
+    private String requestId;
     private List<Tutor> tutors;
     private Long totalElements;
+
+    public SearchTutorResponse(List<Tutor> tutors, long totalElements) {
+    }
 }
