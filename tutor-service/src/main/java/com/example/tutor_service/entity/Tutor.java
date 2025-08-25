@@ -40,6 +40,9 @@ public class Tutor {
     @NotBlank
     private String teachingGrades;
 
+    @Column(nullable = false)
+    private boolean isVerified = false;
+
     @NotBlank(message = "Tên không được để trống")
     private String name;
 
