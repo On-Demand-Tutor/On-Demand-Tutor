@@ -1,4 +1,4 @@
-package main.java.com.example.tutor_service.entity;
+package com.example.tutor_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
