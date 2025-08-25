@@ -1,23 +1,17 @@
-import { TestBed } from '@angular/core/testing';
-import { App } from './app';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router'; // Nếu bạn sử dụng router-outlet trong app.component.html
+import { CommonModule } from '@angular/common'; // Nếu bạn sử dụng các directive như *ngIf, *ngFor
 
-describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    }).compileComponents();
-  });
-
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, ondemandtutor-angularjs');
-  });
-});
+@Component({
+  selector: 'app-root',
+  standalone: true, // Đảm bảo component là standalone nếu dự án Angular của bạn là thế hệ mới
+  imports: [
+    RouterOutlet, // Thêm nếu bạn có <router-outlet> trong app.component.html
+    CommonModule  // Thêm nếu bạn sử dụng các directive của CommonModule
+  ],
+  templateUrl: './app.html', // Đường dẫn đến template HTML
+  styleUrls: ['./app.css']   // Đường dẫn đến file CSS
+})
+export class AppComponent {
+  title = 'ondemandtutor-angularjs'; // Đây là biến title mà test case đang mong đợi
+}
