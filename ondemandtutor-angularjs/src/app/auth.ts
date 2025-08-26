@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080 '; // user-service chạy trên port 8080
+
+  private apiUrl = environment.apiUrls.userService;
 
   constructor(private http: HttpClient) {}
 
@@ -39,14 +42,13 @@ export class AuthService {
     return payload ? payload.id : 0;
   }
 
-  // ===== API gọi BE =====
   register(user: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/register`, user);
-  }
-
+      // POST http://localhost:8082/api/users/register
+      return this.http.post(`${this.apiUrl}/register`, user);
+   }
 
   login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/login`, credentials);
+    return this.http.post(`${this.apiUrl}/login`, credentials);
   }
 
   getUserById(userId: number, role: string): Observable<any> {
