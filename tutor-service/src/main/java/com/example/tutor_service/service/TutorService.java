@@ -21,6 +21,7 @@ public class TutorService {
 
     private final TutorRepository tutorRepository;
 
+
     public void searchAndSendTutors(String requestId, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Tutor> tutorPage = tutorRepository.findBySkillsContaining(keyword, pageable);
@@ -30,8 +31,8 @@ public class TutorService {
         response.setTutors(tutorPage.getContent());
         response.setTotalElements(tutorPage.getTotalElements());
 
-        kafkaTemplate.send("search-tutor-response", response);
-        System.out.println("Đã gửi response sang student-service: " + response);
+        kafkaTemplate.send("search-user-for-tutors", response);
+        System.out.println("Đã gửi response sang user-service để enrich username: " + response);
     }
 
 

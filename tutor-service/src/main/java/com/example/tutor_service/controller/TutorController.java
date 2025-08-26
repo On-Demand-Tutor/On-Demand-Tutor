@@ -13,36 +13,4 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TutorController {
 
-    private final TutorRepository tutorRepository;
-
-    @PostMapping
-    public Tutor createTutor(@RequestBody Map<String, Object> tutorData) {
-        Tutor tutor = Tutor.builder()
-                .userId(Long.valueOf(tutorData.get("userId").toString()))
-                .qualifications((String) tutorData.get("qualifications"))
-                .skills((String) tutorData.get("skills"))
-                .teachingGrades((String) tutorData.get("teachingGrades"))
-                .build();
-
-        return tutorRepository.save(tutor);
-    }
-
-    @PutMapping("/{userId}")
-    public Tutor updateTutor(@PathVariable Long userId, @RequestBody Map<String, Object> tutorData) {
-        Tutor tutor = tutorRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Tutor not found"));
-
-        if (tutorData.get("qualifications") != null) {
-            tutor.setQualifications((String) tutorData.get("qualifications"));
-        }
-        if (tutorData.get("skills") != null) {
-            tutor.setSkills((String) tutorData.get("skills"));
-        }
-        if (tutorData.get("teachingGrades") != null) {
-            tutor.setTeachingGrades((String) tutorData.get("teachingGrades"));
-        }
-
-        return tutorRepository.save(tutor);
-    }
-
 }

@@ -44,33 +44,15 @@ public class StudentConsumer {
         studentRepository.save(student);
     }
 
-    // @KafkaListener(topics = "search-tutor-response", groupId = "student-service-group", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
-    // public void consumeSearchTutor(SearchTutorResponse event) {
-    //     System.out.println("Student Nhận được event search từ Kafka rồi nhé ok ok ++++>>>: " + event);
-    //     if (event != null && event.getTutors() != null) {
-    //         System.out.println("Số lượng tutor tìm được: " + event.getTutors().size());
-    //         System.out.println("Tổng số tutor trong DB: " + event.getTotalElements());
 
-    //         event.getTutors().forEach(tutor -> {
-    //             System.out.println("Tutor ID: " + tutor.getUserId() +
-    //                     ", Skills: " + tutor.getSkills() +
-    //                     ", Rating: " + tutor.getRating());
-    //         });
-    //     } else {
-    //         System.out.println("Không tìm thấy tutor nào!");
-    //     }
+    @KafkaListener(topics = "search-tutor-final-response", groupId = "student-service-group", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
+    public void consumeSearchTutorFinal(SearchTutorResponse event) {
+        System.out.println("Student nhận được kết quả cuối từ UserService: " + event);
 
-    // }
-
-    @KafkaListener(topics = "search-tutor-response", groupId = "student-service-group", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
-    public void consumeSearchTutor(SearchTutorResponse event) {
-        System.out.println("Student Nhận được event search từ Kafka rồi nhé ok ok ++++>>>: " + event);
         if (event != null && event.getTutors() != null) {
-            System.out.println("Số lượng tutor tìm được: " + event.getTutors().size());
-            System.out.println("Tổng số tutor trong DB: " + event.getTotalElements());
-
             event.getTutors().forEach(tutor -> {
                 System.out.println("Tutor ID: " + tutor.getUserId() +
+                        ", Username: " + tutor.getUsername() +
                         ", Skills: " + tutor.getSkills() +
                         ", Rating: " + tutor.getRating());
             });
@@ -78,8 +60,6 @@ public class StudentConsumer {
             System.out.println("Không tìm thấy tutor nào!");
         }
 
-
-        // đẩy response về service để complete future
         studentService.handleSearchTutorResponse(event);
     }
 

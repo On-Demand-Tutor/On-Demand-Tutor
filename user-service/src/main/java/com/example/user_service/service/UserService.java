@@ -109,5 +109,11 @@ public class UserService {
                 .build();
     }
 
+    public String getUsernameByUserId(Long userId) {
+        return userRepository.findById(userId)
+                .map(User::getUsername)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+    }
+
 
 }

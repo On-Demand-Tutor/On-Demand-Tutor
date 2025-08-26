@@ -1,12 +1,11 @@
-package com.example.student_service.dto.response;
+package com.example.user_service.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class TutorResponse {
     private String username;
     private Long userId;
