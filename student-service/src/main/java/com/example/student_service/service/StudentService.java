@@ -2,17 +2,22 @@ package com.example.student_service.service;
 
 import com.example.student_service.dto.request.SearchTutorRequest;
 import com.example.student_service.dto.response.SearchTutorResponse;
+import com.example.student_service.event.ChatMessageEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentService {
@@ -40,5 +45,20 @@ public class StudentService {
             future.complete(response);
         }
     }
+
+
+    @Value("${kafka.topic.chat-messages}")
+    private String chatMessagesTopic;
+
+    public void sendChatMessage(ChatMessageEvent chatMessageEvent) {
+        try {
+
+            kafkaTemplate.send(chatMessagesTopic,chatMessageEvent );
+
+        } catch (Exception e) {
+            log.error("Failed to send chat message to Kafka: {}", e.getMessage());
+        }
+    }
+
 }
 

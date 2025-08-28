@@ -2,17 +2,20 @@ package com.example.tutor_service.service;
 
 import com.example.tutor_service.dto.response.SearchTutorResponse;
 import com.example.tutor_service.entity.Tutor;
+import com.example.tutor_service.event.ChatMessageEvent;
 import com.example.tutor_service.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TutorService {
@@ -33,6 +36,20 @@ public class TutorService {
 
         kafkaTemplate.send("search-user-for-tutors", response);
         System.out.println("Đã gửi response sang user-service để enrich username: " + response);
+    }
+
+    @Value("${kafka.topic.chat-messages}")
+    private String chatMessagesTopic;
+
+    public void sendChatMessage(ChatMessageEvent chatMessageEvent) {
+        try {
+            kafkaTemplate.send(chatMessagesTopic, chatMessageEvent);
+            log.info("Sent chat message event to Kafka: {}", chatMessageEvent.getEventId());
+
+        } catch (Exception e) {
+            log.error("Failed to send chat message to Kafka: {}", e.getMessage());
+            throw new RuntimeException("Failed to send chat message", e);
+        }
     }
 
 
