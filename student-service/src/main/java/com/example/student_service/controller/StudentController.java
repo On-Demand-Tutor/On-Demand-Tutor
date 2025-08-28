@@ -1,6 +1,5 @@
 package com.example.student_service.controller;
 
-import com.example.student_service.dto.request.MessageRequest;
 import com.example.student_service.dto.request.SearchTutorRequest;
 import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.event.ChatMessageEvent;
@@ -27,17 +26,9 @@ public class StudentController {
     }
 
     @PostMapping("/chat/send-message")
-    public ResponseEntity<String> sendMessage(@RequestBody MessageRequest messageRequest){
+    public ResponseEntity<String> sendMessage(@RequestBody ChatMessageEvent chatMessageEvent){
 
-        ChatMessageEvent event = new ChatMessageEvent();
-        event.setSenderId(messageRequest.getStudentId());
-        event.setSenderType("STUDENT");
-        event.setSenderName("Student Name"); // Lấy từ DB
-        event.setReceiverId(messageRequest.getTutorId());
-        event.setReceiverType("TUTOR");
-        event.setContent(messageRequest.getMessageContent());
-
-        studentService.sendChatMessage(event);
+        studentService.sendChatMessage(chatMessageEvent);
 
         return ResponseEntity.ok("Message from student sent successfully");
     }

@@ -21,22 +21,23 @@ public class KafkaChatConsumer {
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @KafkaListener(topics = "${kafka.topic.chat-messages}", groupId = "chat-service-group",containerFactory = "kafkaListenerContainerFactoryForMessageSent")
+    @KafkaListener(
+            topics = "${kafka.topic.chat-messages}",
+            groupId = "chat-service-group",
+            containerFactory = "kafkaListenerContainerFactoryForMessageSent"
+    )
     @Transactional
     public void consumeChatMessage(ChatMessageEvent event) {
         try {
-            log.info("Received chat message event: {}", event.getEventId());
+            log.info("Received chat message event: {}", event);
 
-            // Tìm hoặc tạo chat room
+            // Tìm hoặc tạo chat room theo senderId & receiverId
             ChatRoom chatRoom = chatRoomRepository
-                    .findByStudentIdAndTutorId(
-                            event.getSenderType().equals("STUDENT") ? event.getSenderId() : event.getReceiverId(),
-                            event.getSenderType().equals("TUTOR") ? event.getSenderId() : event.getReceiverId()
-                    )
+                    .findByStudentIdAndTutorId(event.getSenderId(), event.getReceiverId())
                     .orElseGet(() -> {
                         ChatRoom newRoom = new ChatRoom();
-                        newRoom.setStudentId(event.getReceiverType().equals("STUDENT") ? event.getReceiverId() : event.getSenderId());
-                        newRoom.setTutorId(event.getReceiverType().equals("TUTOR") ? event.getReceiverId() : event.getSenderId());
+                        newRoom.setStudentId(event.getSenderId());
+                        newRoom.setTutorId(event.getReceiverId());
                         return chatRoomRepository.save(newRoom);
                     });
 
@@ -49,12 +50,13 @@ public class KafkaChatConsumer {
 
             ChatMessage savedMessage = chatMessageRepository.save(message);
 
+            // Gửi ra WebSocket topic
             messagingTemplate.convertAndSend("/topic/chat/" + chatRoom.getId(), savedMessage);
 
-            log.info("Processed chat message: {}", event.getEventId());
+            log.info("Processed chat message: {}", savedMessage.getId());
 
         } catch (Exception e) {
-            log.error("Error processing chat message: {}", e.getMessage());
+            log.error("Error processing chat message: {}", e.getMessage(), e);
         }
     }
 }

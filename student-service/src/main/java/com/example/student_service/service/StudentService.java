@@ -52,7 +52,6 @@ public class StudentService {
 
     public void sendChatMessage(ChatMessageEvent chatMessageEvent) {
         try {
-
             kafkaTemplate.send(chatMessagesTopic,chatMessageEvent );
 
         } catch (Exception e) {

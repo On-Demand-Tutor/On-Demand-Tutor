@@ -1,5 +1,6 @@
 package com.example.tutor_service.service;
 
+import com.example.tutor_service.dto.request.MessageRequest;
 import com.example.tutor_service.dto.response.SearchTutorResponse;
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.ChatMessageEvent;
@@ -44,7 +45,7 @@ public class TutorService {
     public void sendChatMessage(ChatMessageEvent chatMessageEvent) {
         try {
             kafkaTemplate.send(chatMessagesTopic, chatMessageEvent);
-            log.info("Sent chat message event to Kafka: {}", chatMessageEvent.getEventId());
+            log.info("Sent chat message event to Kafka: {}", chatMessageEvent.getContent());
 
         } catch (Exception e) {
             log.error("Failed to send chat message to Kafka: {}", e.getMessage());

@@ -7,11 +7,9 @@ import com.example.chat_service.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
@@ -56,12 +54,5 @@ public class ChatController {
             log.error("Error sending message to room {}: {}", roomId, e.getMessage());
             throw new RuntimeException("Failed to send message: " + e.getMessage());
         }
-    }
-
-    @MessageExceptionHandler
-    @SendToUser("/queue/errors")
-    public String handleException(Throwable exception) {
-        log.error("WebSocket error: {}", exception.getMessage());
-        return "Error: " + exception.getMessage();
     }
 }

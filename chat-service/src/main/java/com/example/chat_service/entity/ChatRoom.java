@@ -1,5 +1,6 @@
 package com.example.chat_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,5 +25,6 @@ public class ChatRoom {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<ChatMessage> messages = new ArrayList<>();
 }
