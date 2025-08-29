@@ -47,7 +47,6 @@
       
       <button 
         type="submit" 
-        [disabled]="isLoading"
         [class.loading]="isLoading">
         <span *ngIf="!isLoading">Login</span>
         <span *ngIf="isLoading" class="loading-text">

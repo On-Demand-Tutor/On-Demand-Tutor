@@ -1,4 +1,4 @@
-package com.example.tutor_service.config;
+package com.example.tutor_service.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
