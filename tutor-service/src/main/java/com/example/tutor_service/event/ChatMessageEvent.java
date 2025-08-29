@@ -9,6 +9,7 @@ import java.util.UUID;
 public class ChatMessageEvent {
     private Long senderId;
     private Long receiverId;
+    private String senderRole="TUTOR";
     private String content;
     private LocalDateTime timestamp;
 

@@ -11,6 +11,7 @@ public class ChatMessageEvent {
     private Long senderId;
     private Long receiverId;
     private String content;
+    private String senderRole="STUDENT";
     private LocalDateTime timestamp;
 
     public ChatMessageEvent() {

@@ -32,25 +32,36 @@ public class KafkaChatConsumer {
     public void consume(ChatMessageEvent event) {
         log.info("Nhận chat event: {}", event);
 
-        boolean senderOk = chatService.verifyStudent(event.getSenderId())
-                || chatService.verifyTutor(event.getSenderId());
+        boolean senderOk = "STUDENT".equals(event.getSenderRole())
+                ? chatService.verifyStudent(event.getSenderId())
+                : chatService.verifyTutor(event.getSenderId());
 
-        boolean receiverOk = chatService.verifyStudent(event.getReceiverId())
-                || chatService.verifyTutor(event.getReceiverId());
+        boolean receiverOk = "STUDENT".equals(event.getSenderRole())
+                ? chatService.verifyTutor(event.getReceiverId())
+                : chatService.verifyStudent(event.getReceiverId());
 
         if (!(senderOk && receiverOk)) {
-            log.warn("Xác thực thất bại: senderOk={}, receiverOk={}", senderOk, receiverOk);
+            log.warn("❌ Xác thực thất bại: senderOk={}, receiverOk={}", senderOk, receiverOk);
             return;
         }
 
+        // 🔹 Xác định studentId & tutorId theo role
+        Long studentId, tutorId;
+        if ("STUDENT".equals(event.getSenderRole())) {
+            studentId = event.getSenderId();
+            tutorId = event.getReceiverId();
+        } else {
+            tutorId = event.getSenderId();
+            studentId = event.getReceiverId();
+        }
 
-        // 🔹 Tìm hoặc tạo ChatRoom (giữa 2 user bất kỳ)
+        // 🔹 Tìm hoặc tạo ChatRoom
         ChatRoom chatRoom = chatRoomRepository
-                .findByStudentIdAndTutorId(event.getSenderId(), event.getReceiverId())
+                .findByStudentIdAndTutorId(studentId, tutorId)
                 .orElseGet(() -> {
                     ChatRoom newRoom = new ChatRoom();
-                    newRoom.setStudentId(event.getSenderId());
-                    newRoom.setTutorId(event.getReceiverId());
+                    newRoom.setStudentId(studentId);
+                    newRoom.setTutorId(tutorId);
                     return chatRoomRepository.save(newRoom);
                 });
 
@@ -63,9 +74,10 @@ public class KafkaChatConsumer {
 
         ChatMessage savedMessage = chatMessageRepository.save(message);
 
-        // 🔹 Gửi realtime cho frontend qua WebSocket
+        // 🔹 Gửi realtime cho frontend
         messagingTemplate.convertAndSend("/topic/chat/" + chatRoom.getId(), savedMessage);
 
         log.info("✅ Tin nhắn đã lưu & gửi realtime: {}", savedMessage.getContent());
     }
+
 }
