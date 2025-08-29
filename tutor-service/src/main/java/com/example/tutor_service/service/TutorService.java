@@ -53,5 +53,9 @@ public class TutorService {
         }
     }
 
+    public boolean verifyTutor(Long id) {
+        return tutorRepository.findById(id).isPresent();
+    }
+
 
 }

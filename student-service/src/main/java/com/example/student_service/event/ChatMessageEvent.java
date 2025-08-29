@@ -8,8 +8,8 @@ import java.util.UUID;
 
 @Data
 public class ChatMessageEvent {
-    private String senderId;
-    private String receiverId;
+    private Long senderId;
+    private Long receiverId;
     private String content;
     private LocalDateTime timestamp;
 

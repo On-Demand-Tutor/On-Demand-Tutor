@@ -5,6 +5,7 @@ import com.example.chat_service.entity.ChatRoom;
 import com.example.chat_service.event.ChatMessageEvent;
 import com.example.chat_service.repository.ChatMessageRepository;
 import com.example.chat_service.repository.ChatRoomRepository;
+import com.example.chat_service.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class KafkaChatConsumer {
 
+    private final ChatService chatService;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
@@ -27,36 +29,43 @@ public class KafkaChatConsumer {
             containerFactory = "kafkaListenerContainerFactoryForMessageSent"
     )
     @Transactional
-    public void consumeChatMessage(ChatMessageEvent event) {
-        try {
-            log.info("Received chat message event: {}", event);
+    public void consume(ChatMessageEvent event) {
+        log.info("Nhận chat event: {}", event);
 
-            // Tìm hoặc tạo chat room theo senderId & receiverId
-            ChatRoom chatRoom = chatRoomRepository
-                    .findByStudentIdAndTutorId(event.getSenderId(), event.getReceiverId())
-                    .orElseGet(() -> {
-                        ChatRoom newRoom = new ChatRoom();
-                        newRoom.setStudentId(event.getSenderId());
-                        newRoom.setTutorId(event.getReceiverId());
-                        return chatRoomRepository.save(newRoom);
-                    });
+        boolean senderOk = chatService.verifyStudent(event.getSenderId())
+                || chatService.verifyTutor(event.getSenderId());
 
-            // Tạo và lưu message
-            ChatMessage message = new ChatMessage();
-            message.setSenderId(event.getSenderId());
-            message.setContent(event.getContent());
-            message.setChatRoom(chatRoom);
-            message.setTimestamp(event.getTimestamp());
+        boolean receiverOk = chatService.verifyStudent(event.getReceiverId())
+                || chatService.verifyTutor(event.getReceiverId());
 
-            ChatMessage savedMessage = chatMessageRepository.save(message);
-
-            // Gửi ra WebSocket topic
-            messagingTemplate.convertAndSend("/topic/chat/" + chatRoom.getId(), savedMessage);
-
-            log.info("Processed chat message: {}", savedMessage.getId());
-
-        } catch (Exception e) {
-            log.error("Error processing chat message: {}", e.getMessage(), e);
+        if (!(senderOk && receiverOk)) {
+            log.warn("Xác thực thất bại: senderOk={}, receiverOk={}", senderOk, receiverOk);
+            return;
         }
+
+
+        // 🔹 Tìm hoặc tạo ChatRoom (giữa 2 user bất kỳ)
+        ChatRoom chatRoom = chatRoomRepository
+                .findByStudentIdAndTutorId(event.getSenderId(), event.getReceiverId())
+                .orElseGet(() -> {
+                    ChatRoom newRoom = new ChatRoom();
+                    newRoom.setStudentId(event.getSenderId());
+                    newRoom.setTutorId(event.getReceiverId());
+                    return chatRoomRepository.save(newRoom);
+                });
+
+        // 🔹 Tạo và lưu message
+        ChatMessage message = new ChatMessage();
+        message.setSenderId(event.getSenderId());
+        message.setContent(event.getContent());
+        message.setChatRoom(chatRoom);
+        message.setTimestamp(event.getTimestamp());
+
+        ChatMessage savedMessage = chatMessageRepository.save(message);
+
+        // 🔹 Gửi realtime cho frontend qua WebSocket
+        messagingTemplate.convertAndSend("/topic/chat/" + chatRoom.getId(), savedMessage);
+
+        log.info("✅ Tin nhắn đã lưu & gửi realtime: {}", savedMessage.getContent());
     }
 }

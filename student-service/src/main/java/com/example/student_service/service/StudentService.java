@@ -3,6 +3,7 @@ package com.example.student_service.service;
 import com.example.student_service.dto.request.SearchTutorRequest;
 import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.event.ChatMessageEvent;
+import com.example.student_service.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class StudentService {
+
+    private final StudentRepository studentRepository;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -57,6 +60,10 @@ public class StudentService {
         } catch (Exception e) {
             log.error("Failed to send chat message to Kafka: {}", e.getMessage());
         }
+    }
+
+    public boolean verifyStudent(Long id) {
+        return studentRepository.findById(id).isPresent();
     }
 
 }

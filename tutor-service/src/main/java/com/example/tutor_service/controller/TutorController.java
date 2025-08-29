@@ -26,4 +26,9 @@ public class TutorController {
         return ResponseEntity.ok("Message from tutor sent successfully postman");
     }
 
+    @GetMapping("/verify/{userId}")
+    public ResponseEntity<Boolean> verifyTutor(@PathVariable Long userId) {
+        return ResponseEntity.ok(tutorService.verifyTutor(userId));
+    }
+
 }

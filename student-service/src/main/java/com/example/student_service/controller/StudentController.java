@@ -33,5 +33,10 @@ public class StudentController {
         return ResponseEntity.ok("Message from student sent successfully");
     }
 
+    @GetMapping("/verify/{userId}")
+    public ResponseEntity<Boolean> verifyStudent(@PathVariable Long userId) {
+        return ResponseEntity.ok(studentService.verifyStudent(userId));
+    }
+
 
 }

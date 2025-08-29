@@ -19,8 +19,8 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String studentId;
-    private String tutorId;
+    private Long studentId;
+    private Long tutorId;
 
     private LocalDateTime createdAt;
 
