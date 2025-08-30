@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication", description = "API quản lý crud user")
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class UserController {
 

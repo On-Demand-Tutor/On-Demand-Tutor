@@ -26,13 +26,13 @@
       <input type="text" placeholder="Username" required [(ngModel)]="username" name="username">
       <input type="password" placeholder="Password" required [(ngModel)]="password" name="password">
 
-      <select [(ngModel)]="role" name="role">
+      <select [(ngModel)]="newUser.role" name="role">
         <option value="STUDENT">Student</option>
         <option value="TUTOR">Tutor</option>
         <option value="MODERATOR">Moderator</option>
       </select>
 
-      <button type="submit" [disabled]="isLoading">
+      <button type="submit" class="btn btn-primary">
         {{ isLoading ? 'Registering...' : 'Register' }}
       </button>
       <p>Đã có tài khoản? <a routerLink="/login">Đăng nhập</a></p>
@@ -47,7 +47,7 @@
       </svg>
       <h2>Registration Successful!</h2>
       <p>
-        Your account has been created with role <b>{{ role }}</b>.<br/>
+        Your account has been created with role <b>{{ newUser.role }}</b>.<br/>
         Redirecting to login...
       </p>
       <button (click)="goToLogin()">Continue to Login</button>

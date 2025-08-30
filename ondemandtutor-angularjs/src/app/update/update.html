@@ -45,8 +45,8 @@
     <div class="card">
       <h2>About</h2>
       <p><strong>Role:</strong> {{ userRole }}</p>
-      <p *ngIf="userRole === 'student'">Bạn đang đăng nhập với quyền <b>Student</b></p>
-      <p *ngIf="userRole === 'tutor'">Bạn đang đăng nhập với quyền <b>Tutor</b></p>
+      <p *ngIf="userRole === 'student'">Bạn đang đăng nhập với quyền <b>Học sinh</b></p>
+      <p *ngIf="userRole === 'tutor'">Bạn đang đăng nhập với quyền <b>Gia sư</b></p>
       <p *ngIf="!userRole">Bạn chưa đăng nhập. Vui lòng <a routerLink="/login">đăng nhập</a>.</p>
     </div>
 
@@ -61,10 +61,18 @@
         <input type="password" name="password" [(ngModel)]="password" placeholder="Nhập mật khẩu mới (nếu đổi)" />
       </label>
 
-      <label>
-        Grade
-        <input type="number" name="grade" [(ngModel)]="grade" [disabled]="userRole !== 'student'" />
-      </label>
+      <ng-container *ngIf="userRole === 'student'">
+        <label>
+          Grade
+          <input
+            type="number"
+            name="grade"
+            [(ngModel)]="grade"
+            min="1"
+            max="12"
+          />
+        </label>
+      </ng-container>
 
       <label>
         Qualifications
@@ -81,7 +89,7 @@
         <input type="text" name="teachingGrades" [(ngModel)]="teachingGrades" [disabled]="userRole !== 'tutor'" />
       </label>
 
-      <button type="submit" [disabled]="isLoading">
+      <button class="btn btn-primary" type="submit">
         {{ isLoading ? 'Đang lưu...' : 'Save Changes' }}
       </button>
 
