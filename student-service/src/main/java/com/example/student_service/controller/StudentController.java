@@ -2,7 +2,9 @@ package com.example.student_service.controller;
 
 import com.example.student_service.entity.Student;
 import com.example.student_service.repository.StudentRepository;
+import com.example.student_service.service.StudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.security.PermitAll;
 
@@ -14,6 +16,8 @@ import java.util.Map;
 public class StudentController {
 
     private final StudentRepository studentRepository;
+
+    private final StudentService studentService;
 
     @PostMapping
     public Student createStudent(@RequestBody Map<String, Object> studentData) {
@@ -37,5 +41,13 @@ public class StudentController {
 
         return studentRepository.save(student);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Student> getStudentByUserId(@PathVariable Long userId) {
+        Student student = studentService.getStudentByUserId(userId);
+        return ResponseEntity.ok(student);
+    }
+
+
 
 }
