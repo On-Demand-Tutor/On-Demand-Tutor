@@ -147,48 +147,55 @@ public class UserService {
     }
 
 
-    public UserDetailResponse getUserDetail(Long id) {
+    public Object getUserDetail(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        UserDetailResponse response = UserDetailResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .build();
-
-        // Call sang student-service
         if (user.getRole() == UserRole.STUDENT) {
             StudentResponse student = restTemplate.getForObject(
                     "http://student-service:8080/api/students/user/" + user.getId(),
                     StudentResponse.class
             );
             if (student != null) {
-                response.setGrade(student.getGrade());
+                return StudentResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .grade(student.getGrade())
+                        .build();
             }
         }
 
-        // Call sang tutor-service
         if (user.getRole() == UserRole.TUTOR) {
             TutorResponse tutor = restTemplate.getForObject(
                     "http://tutor-service:8081/api/tutors/user/" + user.getId(),
                     TutorResponse.class
             );
             if (tutor != null) {
-                response.setSkills(tutor.getSkills());
-                response.setQualifications(tutor.getQualifications());
-                response.setTeachingGrades(tutor.getTeachingGrades());
-                response.setRating(tutor.getRating());
-                response.setPrice(tutor.getPrice());
-                response.setAvailableTime(tutor.getAvailableTime());
-                response.setDescription(tutor.getDescription());
-                response.setPromoFile(tutor.getPromoFile());
-                response.setVerified(tutor.isVerified());
+                return TutorResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .skills(tutor.getSkills())
+                        .qualifications(tutor.getQualifications())
+                        .teachingGrades(tutor.getTeachingGrades())
+                        .rating(tutor.getRating())
+                        .isVerified(tutor.isVerified())
+                        .price(tutor.getPrice())
+                        .availableTime(tutor.getAvailableTime())
+                        .description(tutor.getDescription())
+                        .promoFile(tutor.getPromoFile())
+                        .build();
             }
         }
 
-        return response;
+        return new UserSummaryResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole().name()
+        );
     }
+
 
 }

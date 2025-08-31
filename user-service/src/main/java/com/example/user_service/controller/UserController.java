@@ -51,18 +51,21 @@ public class UserController {
     }
 
     @GetMapping("/getAllUser")
-    public ApiResponse<Page<UserSummaryResponse>> getUsers(
+    public ApiResponse<List<UserSummaryResponse>> getUsers(
             @RequestParam(defaultValue = "0") int page) {
 
-        return ApiResponse.<Page<UserSummaryResponse>>builder()
-                .result(userService.getUsers(page))
+        Page<UserSummaryResponse> users = userService.getUsers(page);
+
+        return ApiResponse.<List<UserSummaryResponse>>builder()
+                .result(users.getContent())
                 .build();
     }
 
-    @GetMapping("/getUser/{id}")
-    public ApiResponse<UserDetailResponse> getUserDetail(@PathVariable Long id) {
-        return ApiResponse.<UserDetailResponse>builder()
-                .result(userService.getUserDetail(id))
+
+    @GetMapping("/getUser/{userId}")
+    public ApiResponse<Object> getUser(@PathVariable Long userId) {
+        return ApiResponse.<Object>builder()
+                .result(userService.getUserDetail(userId))
                 .build();
     }
 
