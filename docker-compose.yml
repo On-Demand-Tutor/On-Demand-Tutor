@@ -110,7 +110,7 @@ services:
       dockerfile: Dockerfile
     container_name: booking-service
     ports:
-      - "8001:8000"
+      - "8002:8002"
     networks:
       - my-network
 
