@@ -28,8 +28,8 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register","/api/users/update/{id}", "/api/users/login","/api/users/refresh","/api/users/logout","/swagger-ui/**","/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers("/api/users/register","/api/users/update/{id}", "/api/users/login","/api/users/refresh","/api/users/logout","/swagger-ui/**","/v3/api-docs/**","/api/users/getAllUser","/api/users/getUser/{id}").permitAll()
+//                        .requestMatchers("/api/admin/**").hasRole(UserRole.ADMIN.name())
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->

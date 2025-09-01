@@ -4,22 +4,30 @@ package com.example.user_service.service;
 import com.example.user_service.dto.request.UserCreateRequest;
 import com.example.user_service.dto.request.UserLoginRequest;
 import com.example.user_service.dto.request.UserUpdateRequest;
-import com.example.user_service.dto.response.UserResponse;
+import com.example.user_service.dto.response.*;
 import com.example.user_service.entity.User;
 import com.example.user_service.enums.UserRole;
 import com.example.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -61,7 +69,7 @@ public class UserService {
             tutorData.put("teachingGrades", request.getTeachingGrades());
 
             restTemplate.postForObject(
-                    "http://tutor-service:8080/api/tutors",
+                    "http://tutor-service:8081/api/tutors",
                     tutorData,
                     Void.class
             );
@@ -104,7 +112,7 @@ public class UserService {
             tutorData.put("teachingGrades", request.getTeachingGrades());
 
             restTemplate.put(
-                    "http://tutor-service:8080/api/tutors/" +userId,
+                    "http://tutor-service:8081/api/tutors/" +userId,
                     tutorData
             );
         }
@@ -116,8 +124,6 @@ public class UserService {
                 .build();
     }
 
-
-
     public void login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng"));
@@ -126,5 +132,70 @@ public class UserService {
             throw new RuntimeException("Email hoặc mật khẩu không đúng");
         }
     }
+
+    public Page<UserSummaryResponse> getUsers(int page) {
+        Pageable pageable = PageRequest.of(page, 6);
+        Page<User> users = userRepository.findAll(pageable);
+
+        return users.map(user -> UserSummaryResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .role(user.getRole().name())
+                .build()
+        );
+    }
+
+
+    public Object getUserDetail(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() == UserRole.STUDENT) {
+            StudentResponse student = restTemplate.getForObject(
+                    "http://student-service:8080/api/students/user/" + user.getId(),
+                    StudentResponse.class
+            );
+            if (student != null) {
+                return StudentResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .grade(student.getGrade())
+                        .build();
+            }
+        }
+
+        if (user.getRole() == UserRole.TUTOR) {
+            TutorResponse tutor = restTemplate.getForObject(
+                    "http://tutor-service:8081/api/tutors/user/" + user.getId(),
+                    TutorResponse.class
+            );
+            if (tutor != null) {
+                return TutorResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .skills(tutor.getSkills())
+                        .qualifications(tutor.getQualifications())
+                        .teachingGrades(tutor.getTeachingGrades())
+                        .rating(tutor.getRating())
+                        .isVerified(tutor.isVerified())
+                        .price(tutor.getPrice())
+                        .availableTime(tutor.getAvailableTime())
+                        .description(tutor.getDescription())
+                        .promoFile(tutor.getPromoFile())
+                        .build();
+            }
+        }
+
+        return new UserSummaryResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole().name()
+        );
+    }
+
 
 }
