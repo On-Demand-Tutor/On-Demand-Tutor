@@ -1,17 +1,12 @@
-# Sử dụng image cơ sở Java
-FROM openjdk:17-jdk
+FROM python:3.13-slim
 
-# Thông tin tác giả
-LABEL authors="congng"
-
-# Tạo thư mục làm việc trong container
 WORKDIR /app
 
-# Sao chép tệp JAR vào container
-COPY target/admin-moderator-service-0.0.1-SNAPSHOT.jar /app/admin-moderator-service-0.0.1-SNAPSHOT.jar
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port của ứng dụng
-EXPOSE 8084
+COPY app/ /app/app/
 
-# Câu lệnh để chạy ứng dụng
-ENTRYPOINT ["java", "-jar", "/app/admin-moderator-service-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
