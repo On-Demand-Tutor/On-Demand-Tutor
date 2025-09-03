@@ -18,4 +18,7 @@ public class UserUpdateRequest {
     private String qualifications;
     private String skills;
     private String teachingGrades;
+
+    private String availableTime;
+    private String description;
 }
