@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy toàn bộ code vào container
 COPY . .
 
-# Expose port 8000 (có thể sửa nếu app.py chạy port khác)
 EXPOSE 8002
 
 # Chạy app
-CMD ["python", "app.py"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["python", "app.py"]

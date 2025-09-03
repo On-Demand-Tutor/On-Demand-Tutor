@@ -3,7 +3,7 @@ import requests
 from rest_framework import serializers
 from .models import Rating, Complaint
 
-BOOKING_SERVICE_URL = os.getenv("BOOKING_SERVICE_URL")
+BOOKING_SERVICE_URL = os.getenv("BOOKING_SERVICE_URL", "http://localhost:9000")
 ROLE_HEADER = os.getenv("ROLE_HEADER", "X-User-Role")
 USER_ID_HEADER = os.getenv("USER_ID_HEADER", "X-User-Id")
 
