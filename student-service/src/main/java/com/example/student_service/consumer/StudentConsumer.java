@@ -3,6 +3,7 @@ package com.example.student_service.consumer;
 
 import com.example.student_service.entity.Student;
 import com.example.student_service.event.StudentCreatedEvent;
+import com.example.student_service.event.StudentUpdatedEvent;
 import com.example.student_service.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -21,6 +22,19 @@ public class StudentConsumer {
                 .userId(event.getUserId())
                 .grade(event.getGrade())
                 .build();
+        studentRepository.save(student);
+    }
+
+    @KafkaListener(topics = "student-updated", groupId = "student-service-group", containerFactory = "kafkaListenerContainerFactoryForUpdateStudent")
+    public void consumeStudentUpdated(StudentUpdatedEvent event) {
+        System.out.println("Student Nhận được event update từ Kafka rồi nhé ok ok ++++>>>: " + event);
+
+        Student student = studentRepository.findByUserId(event.getUserId())
+                .orElseThrow(() -> new RuntimeException("Student not found with userId: " + event.getUserId()));
+
+        if (event.getGrade() != null) {
+            student.setGrade(event.getGrade());
+        }
         studentRepository.save(student);
     }
 }
