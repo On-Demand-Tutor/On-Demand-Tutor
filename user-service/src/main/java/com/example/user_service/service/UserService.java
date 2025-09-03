@@ -8,7 +8,9 @@ import com.example.user_service.dto.response.*;
 import com.example.user_service.entity.User;
 import com.example.user_service.enums.UserRole;
 import com.example.user_service.event.StudentCreatedEvent;
+import com.example.user_service.event.StudentUpdatedEvent;
 import com.example.user_service.event.TutorCreatedEvent;
+import com.example.user_service.event.TutorUpdatedEvent;
 import com.example.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +85,7 @@ public class UserService {
                 .build();
     }
 
-    public UserResponse updateUser(Long userId,UserUpdateRequest request) {
+    public UserResponse updateUser(Long userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -92,36 +94,33 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        userRepository.save(user);
+        User updatedUser = userRepository.save(user);
 
-        if (user.getRole() == UserRole.STUDENT) {
-            Map<String, Object> studentData = new HashMap<>();
-            studentData.put("userId", user.getId());
-            studentData.put("grade", request.getGrade());
-
-            restTemplate.put(
-                    "http://student-service:8080/api/students/" + userId,
-                    studentData
+        //Publish event sang 2 bên để dùng ROLE rồi check thôi kkk
+        if (updatedUser.getRole() == UserRole.STUDENT) {
+            StudentUpdatedEvent event = new StudentUpdatedEvent(
+                    updatedUser.getId(),
+                    request.getGrade()
             );
+            kafkaTemplate.send("student-updated", event);
+            System.out.println("Đã gửi Kafka event update Student=========================================================: " + event);
         }
 
-        if (user.getRole() == UserRole.TUTOR) {
-            Map<String, Object> tutorData = new HashMap<>();
-            tutorData.put("userId", user.getId());
-            tutorData.put("qualifications", request.getQualifications());
-            tutorData.put("skills", request.getSkills());
-            tutorData.put("teachingGrades", request.getTeachingGrades());
-
-            restTemplate.put(
-                    "http://tutor-service:8081/api/tutors/" +userId,
-                    tutorData
+        if (updatedUser.getRole() == UserRole.TUTOR) {
+            TutorUpdatedEvent event = new TutorUpdatedEvent(
+                    updatedUser.getId(),
+                    request.getQualifications(),
+                    request.getSkills(),
+                    request.getTeachingGrades()
             );
+            kafkaTemplate.send("tutor-updated", event);
+            System.out.println("Đã gửi Kafka event update Tutor========================================================= " + event);
         }
 
         return UserResponse.builder()
-                .id(String.valueOf(user.getId()))
-                .username(user.getUsername())
-                .email(user.getEmail())
+                .id(String.valueOf(updatedUser.getId()))
+                .username(updatedUser.getUsername())
+                .email(updatedUser.getEmail())
                 .build();
     }
 
