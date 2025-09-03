@@ -51,4 +51,10 @@ public class KafkaConsumerConfig {
     public ConcurrentKafkaListenerContainerFactory<String, StudentUpdatedEvent> kafkaListenerContainerFactoryForUpdateStudent() {
         return kafkaListenerContainerFactory(StudentUpdatedEvent.class);
     }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, SearchTutorResponse> kafkaListenerContainerFactoryForSearchTutor() {
+        return kafkaListenerContainerFactory(SearchTutorResponse.class);
+    }
+
 }

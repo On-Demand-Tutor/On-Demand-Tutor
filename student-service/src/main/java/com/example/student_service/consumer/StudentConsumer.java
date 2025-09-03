@@ -5,6 +5,7 @@ import com.example.student_service.entity.Student;
 import com.example.student_service.event.StudentCreatedEvent;
 import com.example.student_service.event.StudentUpdatedEvent;
 import com.example.student_service.repository.StudentRepository;
+import com.example.student_service.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 public class StudentConsumer {
 
     private final StudentRepository studentRepository;
+
+    private final StudentService studentService;
 
     @KafkaListener(topics = "student-created", groupId = "student-service-group")
     public void consumeStudentCreated(StudentCreatedEvent event) {
@@ -36,5 +39,23 @@ public class StudentConsumer {
             student.setGrade(event.getGrade());
         }
         studentRepository.save(student);
+    }
+
+    @KafkaListener(topics = "search-tutor-final-response", groupId = "student-service-group", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
+    public void consumeSearchTutorFinal(SearchTutorResponse event) {
+        System.out.println("Student nhận được kết quả cuối từ UserService: " + event);
+
+        if (event != null && event.getTutors() != null) {
+            event.getTutors().forEach(tutor -> {
+                System.out.println("Tutor ID: " + tutor.getUserId() +
+                        ", Username: " + tutor.getUsername() +
+                        ", Skills: " + tutor.getSkills() +
+                        ", Rating: " + tutor.getRating());
+            });
+        } else {
+            System.out.println("Không tìm thấy tutor nào!");
+        }
+
+        studentService.handleSearchTutorResponse(event);
     }
 }
