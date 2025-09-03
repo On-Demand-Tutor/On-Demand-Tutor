@@ -111,7 +111,9 @@ public class UserService {
                     updatedUser.getId(),
                     request.getQualifications(),
                     request.getSkills(),
-                    request.getTeachingGrades()
+                    request.getTeachingGrades(),
+                    request.getAvailableTime(),
+                    request.getDescription()
             );
             kafkaTemplate.send("tutor-updated", event);
             System.out.println("Đã gửi Kafka event update Tutor========================================================= " + event);
