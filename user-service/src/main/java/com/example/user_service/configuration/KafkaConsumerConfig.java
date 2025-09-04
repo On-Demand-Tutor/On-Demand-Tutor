@@ -1,8 +1,8 @@
-package com.example.student_service.configuration;
+package com.example.user_service.configuration;
 
-import com.example.student_service.dto.response.SearchTutorResponse;
-import com.example.student_service.event.StudentCreatedEvent;
-import com.example.student_service.event.StudentUpdatedEvent;
+
+
+import com.example.user_service.dto.response.SearchTutorResponse;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,7 @@ public class KafkaConsumerConfig {
     private <T> ConsumerFactory<String, T> consumerFactory(Class<T> clazz) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "student-service-group");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "user-service-group");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
@@ -42,20 +42,10 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, StudentCreatedEvent> kafkaListenerContainerFactoryForcreateStudent() {
-        return kafkaListenerContainerFactory(StudentCreatedEvent.class);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, StudentUpdatedEvent> kafkaListenerContainerFactoryForUpdateStudent() {
-        return kafkaListenerContainerFactory(StudentUpdatedEvent.class);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, SearchTutorResponse> kafkaListenerContainerFactoryForSearchTutor() {
+    public ConcurrentKafkaListenerContainerFactory<String, SearchTutorResponse> kafkaListenerContainerFactoryForSearchTutorResponse() {
         return kafkaListenerContainerFactory(SearchTutorResponse.class);
     }
+
 
 }

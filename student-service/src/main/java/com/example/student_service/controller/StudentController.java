@@ -1,5 +1,7 @@
 package com.example.student_service.controller;
 
+import com.example.student_service.dto.request.SearchTutorRequest;
+import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
 import com.example.student_service.repository.StudentRepository;
 import com.example.student_service.service.StudentService;
@@ -48,6 +50,15 @@ public class StudentController {
         return ResponseEntity.ok(student);
     }
 
+    @PostMapping("/search-tutor")
+    public SearchTutorResponse searchTutor(@RequestBody SearchTutorRequest request) throws Exception {
+        SearchTutorResponse response = studentService.searchTutorByNameOrSkill(request);
 
+        System.out.println("✅ Đã gửi request search tutor ở student controller với từ khóa: " + request.getKeyword());
+        System.out.println("👉 Kết quả search: " + response);
+
+        return response;
+    }
 
 }
+
