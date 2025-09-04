@@ -1,6 +1,7 @@
 package com.example.student_service.consumer;
 
 
+import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
 import com.example.student_service.event.StudentCreatedEvent;
 import com.example.student_service.event.StudentUpdatedEvent;

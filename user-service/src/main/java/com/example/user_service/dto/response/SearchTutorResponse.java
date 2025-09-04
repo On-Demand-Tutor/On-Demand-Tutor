@@ -1,4 +1,4 @@
-package com.example.student_service.dto.response;
+package com.example.user_service.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

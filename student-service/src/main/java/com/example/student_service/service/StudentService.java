@@ -1,5 +1,7 @@
 package com.example.student_service.service;
 
+import com.example.student_service.dto.request.SearchTutorRequest;
+import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
 import com.example.student_service.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor

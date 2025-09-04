@@ -1,16 +1,17 @@
-package com.example.student_service.dto.response;
+package com.example.user_service.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TutorResponse {
+@Getter
+@Setter
+public class TutorResponseForSearch {
     private String username;
     private Long userId;
     private String skills;
     private Double rating;
     private String teachingGrades;
+    private Double price;
+    private String availableTime;
 }

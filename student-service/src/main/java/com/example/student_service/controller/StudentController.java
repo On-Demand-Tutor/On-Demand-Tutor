@@ -1,5 +1,7 @@
 package com.example.student_service.controller;
 
+import com.example.student_service.dto.request.SearchTutorRequest;
+import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
 import com.example.student_service.repository.StudentRepository;
 import com.example.student_service.service.StudentService;
@@ -60,4 +62,3 @@ public class StudentController {
 
 }
 
-}
