@@ -52,13 +52,27 @@ public class StudentController {
 
     @PostMapping("/search-tutor")
     public SearchTutorResponse searchTutor(@RequestBody SearchTutorRequest request) throws Exception {
-        SearchTutorResponse response = studentService.searchTutorByNameOrSkill(request);
+        SearchTutorResponse response = studentService.searchTutorBySkill(request);
 
         System.out.println("✅ Đã gửi request search tutor ở student controller với từ khóa: " + request.getKeyword());
         System.out.println("👉 Kết quả search: " + response);
 
         return response;
     }
+
+    @PostMapping("/chat/send-message")
+    public ResponseEntity<String> sendMessage(@RequestBody ChatMessageEvent chatMessageEvent){
+
+        studentService.sendChatMessage(chatMessageEvent);
+
+        return ResponseEntity.ok("Message from student sent successfully");
+    }
+
+    @GetMapping("/verify/{userId}")
+    public ResponseEntity<Boolean> verifyStudent(@PathVariable Long userId) {
+        return ResponseEntity.ok(studentService.verifyStudent(userId));
+    }
+
 
 }
 

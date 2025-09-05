@@ -3,9 +3,11 @@ package com.example.student_service.service;
 import com.example.student_service.dto.request.SearchTutorRequest;
 import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
+import com.example.student_service.event.ChatMessageEvent;
 import com.example.student_service.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +35,7 @@ public class StudentService {
                 .orElseThrow(() -> new RuntimeException("Student not found"));
     }
 
-    public SearchTutorResponse searchTutorByNameOrSkill(SearchTutorRequest request) throws Exception {
+    public SearchTutorResponse searchTutorBySkill(SearchTutorRequest request) throws Exception {
         String requestId = UUID.randomUUID().toString();
         request.setRequestId(requestId);
 
@@ -52,5 +54,22 @@ public class StudentService {
             future.complete(response);
         }
     }
+
+    @Value("${kafka.topic.chat-messages}")
+    private String chatMessagesTopic;
+
+    public void sendChatMessage(ChatMessageEvent chatMessageEvent) {
+        try {
+            kafkaTemplate.send(chatMessagesTopic,chatMessageEvent );
+
+        } catch (Exception e) {
+            log.error("Failed to send chat message to Kafka: {}", e.getMessage());
+        }
+    }
+
+    public boolean verifyStudent(Long id) {
+        return studentRepository.findById(id).isPresent();
+    }
+
 
 }
