@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+import uuid
 
 class Rating(models.Model):
     booking_id = models.UUIDField(null=True, blank=True)  # ID của booking bên service Booking
@@ -10,35 +11,47 @@ class Rating(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-            db_table = "ratings"
-            indexes = [
-                models.Index(fields=["tutor_id"]),
-                models.Index(fields=["student_id"]),
-                models.Index(fields=["booking_id"]),
-            ]
-            constraints = [
-                models.UniqueConstraint(
-                    fields=["booking_id", "student_id"], name="uniq_rating_per_booking_student"
-                )
-            ]
+        db_table = "ratings"
+        indexes = [
+            models.Index(fields=["tutor_id"]),
+            models.Index(fields=["student_id"]),
+            models.Index(fields=["booking_id"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["booking_id", "student_id"], name="uniq_rating_per_booking_student"
+            )
+        ]
 
     def __str__(self):
         return f"Tutor {self.tutor_id} - {self.score} stars"
 
 class Complaint(models.Model):
+    class Status(models.TextChoices):
+        OPEN = "open", "Open"
+        IN_REVIEW = "in-review", "In Review"
+        RESOLVED = "resolved", "Resolved"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tutor_id = models.UUIDField()
     student_id = models.UUIDField()
-    description = models.TextField()
+    content = models.TextField()
     status = models.CharField(
         max_length=20,
-        choices=[
-            ('pending', 'Pending'),
-            ('resolved', 'Resolved'),
-            ('rejected', 'Rejected'),
-        ],
-        default='pending'
+        choices=Status.choices,
+        default=Status.OPEN,
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "complaints"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["tutor_id"]),
+            models.Index(fields=["student_id"]),
+            models.Index(fields=["status"]),
+        ]
 
     def __str__(self):
-        return f"Complaint {self.id} - {self.status}"
+        return f"{self.id} • {self.status}"
