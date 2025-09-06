@@ -1,6 +1,7 @@
 package com.example.tutor_service.controller;
 
 import com.example.tutor_service.entity.Tutor;
+import com.example.tutor_service.event.ChatMessageEvent;
 import com.example.tutor_service.repository.TutorRepository;
 import com.example.tutor_service.service.TutorService;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +60,19 @@ public class TutorController {
     public ResponseEntity<Tutor> getTutorByUserId(@PathVariable Long userId) {
         Tutor tutor = tutorService.getTutorByUserId(userId);
         return ResponseEntity.ok(tutor);
+    }
+
+    @PostMapping("/chat/send-message")
+    public ResponseEntity<String> sendMessage(@RequestBody ChatMessageEvent chatMessageEvent) {
+
+        tutorService.sendChatMessage(chatMessageEvent);
+        System.out.println("Message from tutor sent successfully  terminal");
+
+        return ResponseEntity.ok("Message from tutor sent successfully postman");
+    }
+
+    @GetMapping("/verify/{userId}")
+    public ResponseEntity<Boolean> verifyTutor(@PathVariable Long userId) {
+        return ResponseEntity.ok(tutorService.verifyTutor(userId));
     }
 }

@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface TutorRepository extends JpaRepository<Tutor, Long> {
     Optional<Tutor> findByUserId(Long userId);
+//    Optional<Tutor> findById(Long id);
 }
