@@ -1,6 +1,7 @@
 package com.example.tutor_service.configuration;
 
 
+import com.example.tutor_service.dto.request.SearchTutorRequest;
 import com.example.tutor_service.event.TutorCreatedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -19,8 +20,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Bean
-    public ConsumerFactory<String, TutorCreatedEvent> consumerFactory() {
+    private <T> ConsumerFactory<String, T> consumerFactory(Class<T> clazz) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "tutor-service-group");
@@ -28,15 +28,29 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-                new JsonDeserializer<>(TutorCreatedEvent.class, false));
+
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                new JsonDeserializer<>(clazz, false)
+        );
+    }
+
+    private <T> ConcurrentKafkaListenerContainerFactory<String, T> kafkaListenerContainerFactory(Class<T> clazz) {
+        ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory(clazz));
+        return factory;
+    }
+
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, TutorCreatedEvent> kafkaListenerContainerFactoryForCreateTutor() {
+        return kafkaListenerContainerFactory(TutorCreatedEvent.class);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TutorCreatedEvent> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, TutorCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        return factory;
+    public ConcurrentKafkaListenerContainerFactory<String, SearchTutorRequest> kafkaListenerContainerFactoryForSearchTutor() {
+        return kafkaListenerContainerFactory(SearchTutorRequest.class);
     }
 
 }
