@@ -24,3 +24,30 @@ node_modules/
 target/
 build/
 dist/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtualenv
+.venv/
+venv/
+
+# Local database
+db.sqlite3
+
+# Django static files (collected)
+staticfiles/
+media/
+
+# Coverage / test reports
+.coverage
+htmlcov/
+
+# Environment file (thực tế)
+.env
+
+# Migration cache (chỉ bỏ pycache, giữ file .py)
+*/migrations/__pycache__/
