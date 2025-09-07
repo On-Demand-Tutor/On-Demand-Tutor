@@ -70,9 +70,10 @@ public class UserService {
         if (savedUser.getRole() == UserRole.TUTOR) {
             TutorCreatedEvent event = new TutorCreatedEvent(
                     savedUser.getId(),
-                    request.getQualifications(),
+                   request.getQualifications(),
                     request.getSkills(),
-                    request.getTeachingGrades()
+                    request.getTeachingGrades(),
+                    request.getPrice()
             );
             kafkaTemplate.send("tutor-created", event);
             System.out.println("Đã gửi Kafka event tới Tutor:========================================================= " + event);
@@ -112,8 +113,7 @@ public class UserService {
                     request.getQualifications(),
                     request.getSkills(),
                     request.getTeachingGrades(),
-                    request.getAvailableTime(),
-                    request.getDescription()
+                    request.getPrice()
             );
             kafkaTemplate.send("tutor-updated", event);
             System.out.println("Đã gửi Kafka event update Tutor========================================================= " + event);
