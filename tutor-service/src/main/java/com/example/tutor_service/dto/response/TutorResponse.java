@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class TutorResponse {
     private Long userId;
     private String skills;
-    private Double rating;
+    private Double price;
+    private String qualifications;
     private String teachingGrades;
 }
