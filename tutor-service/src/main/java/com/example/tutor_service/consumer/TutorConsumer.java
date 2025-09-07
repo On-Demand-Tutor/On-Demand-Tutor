@@ -31,6 +31,28 @@ public class TutorConsumer {
         tutorRepository.save(tutor);
     }
 
+    
+    @KafkaListener(topics = "tutor-updated", groupId = "tutor-service-group", containerFactory = "kafkaListenerContainerFactoryForUpdateTutor")
+    public void consumeTutorUpdated(TutorUpdatedEvent event) {
+        System.out.println("Tutor Nhận được event update từ Kafka rồi nhé ok ok ++++>>>: " + event);
+
+        Tutor tutor = tutorRepository.findByUserId(event.getUserId())
+                .orElseThrow(() -> new RuntimeException("Tutor not found with userId: " + event.getUserId()));
+        if (event.getQualifications() != null) {
+            tutor.setQualifications(event.getQualifications());
+        }
+        if (event.getSkills() != null) {
+            tutor.setSkills(event.getSkills());
+        }
+        if (event.getPrice() != null) {
+            tutor.setPrice(event.getPrice());
+        }
+        if (event.getTeachingGrades() != null) {
+            tutor.setTeachingGrades(event.getTeachingGrades());
+        }
+        tutorRepository.save(tutor);
+    }
+
     @KafkaListener(topics = "search-tutor", groupId = "tutor-service-service", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
     public void handleSearchTutor(SearchTutorRequest request) {
         System.out.println("Nhận event từ student-service: " + request);
