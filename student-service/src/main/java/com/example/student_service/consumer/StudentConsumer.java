@@ -19,7 +19,7 @@ public class StudentConsumer {
 
     private final StudentService studentService;
 
-    @KafkaListener(topics = "student-created", groupId = "student-service-group")
+    @KafkaListener(topics = "student-created", groupId = "student-service-group",containerFactory = "kafkaListenerContainerFactoryForcreateStudent")
     public void consumeStudentCreated(StudentCreatedEvent event) {
         System.out.println("Student Nhận được event từ Kafka rồi nhé ok ok ++++>>>: " + event);
         Student student = Student.builder()

@@ -3,13 +3,17 @@ package com.example.student_service.controller;
 import com.example.student_service.dto.request.SearchTutorRequest;
 import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
+import com.example.student_service.event.ChatMessageEvent;
 import com.example.student_service.repository.StudentRepository;
 import com.example.student_service.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import jakarta.annotation.security.PermitAll;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -52,13 +56,46 @@ public class StudentController {
 
     @PostMapping("/search-tutor")
     public SearchTutorResponse searchTutor(@RequestBody SearchTutorRequest request) throws Exception {
-        SearchTutorResponse response = studentService.searchTutorByNameOrSkill(request);
+        SearchTutorResponse response = studentService.searchTutorBySkill(request);
 
         System.out.println("✅ Đã gửi request search tutor ở student controller với từ khóa: " + request.getKeyword());
         System.out.println("👉 Kết quả search: " + response);
 
         return response;
     }
+
+    @PostMapping("/chat/send-message/{receiverUserId}")
+    public ResponseEntity<Void> sendMessage(
+            @PathVariable Long receiverUserId,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody ChatMessageEvent request
+    ) {
+        Long senderUserId = jwt.getClaim("userId");
+
+        Student student = studentService.getStudentByUserId(senderUserId);
+        Long studentId = student.getId();
+
+        Long tutorId = studentService.getTutorIdByUserId(receiverUserId);
+
+        ChatMessageEvent event = new ChatMessageEvent();
+        event.setSenderId(studentId);
+        event.setReceiverId(tutorId);
+        event.setContent(request.getContent());
+        event.setTimestamp(LocalDateTime.now());
+        event.setSenderRole("STUDENT");
+
+        // Gửi qua Kafka
+        studentService.sendChatMessage(event);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/verify/{userId}")
+    public ResponseEntity<Boolean> verifyStudent(@PathVariable Long userId) {
+        return ResponseEntity.ok(studentService.verifyStudent(userId));
+    }
+
 
 }
 
