@@ -26,9 +26,6 @@ public class TutorService {
     private final TutorRepository tutorRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-
-
     public Tutor getTutorByUserId(Long userId) {
         return tutorRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Tutor not found"));
