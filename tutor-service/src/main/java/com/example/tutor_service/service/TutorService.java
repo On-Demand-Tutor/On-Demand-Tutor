@@ -1,12 +1,17 @@
 package com.example.tutor_service.service;
 
 import com.example.tutor_service.dto.response.StudentResponse;
+import com.example.tutor_service.dto.response.SearchTutorResponse;
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.ChatMessageEvent;
 import com.example.tutor_service.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +24,7 @@ public class TutorService {
     private final RestTemplate restTemplate;
 
     private final TutorRepository tutorRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -27,6 +33,7 @@ public class TutorService {
         return tutorRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Tutor not found"));
     }
+
 
     public Long getStudentIdByUserId(Long userId) {
         String url = "http://student-service:8080/api/students/user/" + userId;
@@ -55,4 +62,16 @@ public class TutorService {
         return tutorRepository.findById(id).isPresent();
     }
 
+    public void searchAndSendTutors(String requestId, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Tutor> tutorPage = tutorRepository.findBySkillsContaining(keyword, pageable);
+
+        SearchTutorResponse response = new SearchTutorResponse();
+        response.setRequestId(requestId);
+        response.setTutors(tutorPage.getContent());
+        response.setTotalElements(tutorPage.getTotalElements());
+
+        kafkaTemplate.send("search-user-for-tutors", response);
+        System.out.println("Đã gửi response sang user-service để enrich username: " + response);
+    }
 }

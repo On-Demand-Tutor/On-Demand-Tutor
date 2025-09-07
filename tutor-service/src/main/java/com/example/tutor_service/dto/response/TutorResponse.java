@@ -1,4 +1,4 @@
-package com.example.tutor_service.event;
+package com.example.tutor_service.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TutorCreatedEvent {
+public class TutorResponse {
     private Long userId;
-    private String qualifications;
     private String skills;
     private Double price;
+    private String qualifications;
     private String teachingGrades;
 }
