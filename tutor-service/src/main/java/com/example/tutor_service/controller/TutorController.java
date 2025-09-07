@@ -6,8 +6,11 @@ import com.example.tutor_service.repository.TutorRepository;
 import com.example.tutor_service.service.TutorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -62,13 +65,30 @@ public class TutorController {
         return ResponseEntity.ok(tutor);
     }
 
-    @PostMapping("/chat/send-message")
-    public ResponseEntity<String> sendMessage(@RequestBody ChatMessageEvent chatMessageEvent) {
+    @PostMapping("/chat/send-message/{receiverUserId}")
+    public ResponseEntity<Void> sendMessage(
+            @PathVariable Long receiverUserId,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody ChatMessageEvent request
+    ) {
+        Long senderUserId = jwt.getClaim("userId");
 
-        tutorService.sendChatMessage(chatMessageEvent);
-        System.out.println("Message from tutor sent successfully  terminal");
+        Tutor tutor = tutorService.getTutorByUserId(senderUserId);
+        Long studentId = tutor.getId();
 
-        return ResponseEntity.ok("Message from tutor sent successfully postman");
+        Long tutorId = tutorService.getStudentIdByUserId(receiverUserId);
+
+        ChatMessageEvent event = new ChatMessageEvent();
+        event.setSenderId(studentId);
+        event.setReceiverId(tutorId);
+        event.setContent(request.getContent());
+        event.setTimestamp(LocalDateTime.now());
+        event.setSenderRole("STUDENT");
+
+        // Gửi qua Kafka
+        tutorService.sendChatMessage(event);
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/verify/{userId}")

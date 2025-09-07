@@ -19,8 +19,6 @@ import javax.crypto.spec.SecretKeySpec;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final RestTemplate restTemplate;
-
     @Value("${signer.key}")
     private String signerKey;
 

@@ -2,6 +2,7 @@ package com.example.student_service.service;
 
 import com.example.student_service.dto.request.SearchTutorRequest;
 import com.example.student_service.dto.response.SearchTutorResponse;
+import com.example.student_service.dto.response.TutorResponse;
 import com.example.student_service.entity.Student;
 import com.example.student_service.event.ChatMessageEvent;
 import com.example.student_service.repository.StudentRepository;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 
 public class StudentService {
+
+    private final RestTemplate restTemplate;
 
     private final StudentRepository studentRepository;
 
@@ -55,13 +59,22 @@ public class StudentService {
         }
     }
 
+    public Long getTutorIdByUserId(Long userId) {
+        String url = "http://tutor-service:8080/api/tutors/user/" + userId;
+        TutorResponse tutor = restTemplate.getForObject(url, TutorResponse.class);
+        if (tutor == null) {
+            throw new RuntimeException("Tutor not found with userId=" + userId);
+        }
+        return tutor.getId();
+    }
+
     @Value("${kafka.topic.chat-messages}")
     private String chatMessagesTopic;
 
     public void sendChatMessage(ChatMessageEvent chatMessageEvent) {
         try {
             kafkaTemplate.send(chatMessagesTopic,chatMessageEvent );
-
+            log.info("Sent chat message event to Kafka: {}", chatMessageEvent.getContent());
         } catch (Exception e) {
             log.error("Failed to send chat message to Kafka: {}", e.getMessage());
         }

@@ -1,5 +1,6 @@
 package com.example.tutor_service.service;
 
+import com.example.tutor_service.dto.response.StudentResponse;
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.ChatMessageEvent;
 import com.example.tutor_service.repository.TutorRepository;
@@ -8,11 +9,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TutorService {
+
+    private final RestTemplate restTemplate;
+
     private final TutorRepository tutorRepository;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -21,6 +26,15 @@ public class TutorService {
     public Tutor getTutorByUserId(Long userId) {
         return tutorRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Tutor not found"));
+    }
+
+    public Long getStudentIdByUserId(Long userId) {
+        String url = "http://student-service:8080/api/students/user/" + userId;
+        StudentResponse student = restTemplate.getForObject(url, StudentResponse.class);
+        if (student == null) {
+            throw new RuntimeException("Student not found with userId=" + userId);
+        }
+        return student.getId();
     }
 
     @Value("${kafka.topic.chat-messages}")

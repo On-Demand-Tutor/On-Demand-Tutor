@@ -9,11 +9,7 @@ import java.util.UUID;
 public class ChatMessageEvent {
     private Long senderId;
     private Long receiverId;
-    private String senderRole="TUTOR";
+    private String senderRole;
     private String content;
-    private LocalDateTime timestamp;
-
-    public ChatMessageEvent() {
-        this.timestamp = LocalDateTime.now();
-    }
+    private LocalDateTime timestamp = LocalDateTime.now();
 }
