@@ -34,5 +34,7 @@ public class UserCreateRequest {
     private String teachingGrades;
 
     private Integer grade;
+    private Double price;
+    
 
 }
