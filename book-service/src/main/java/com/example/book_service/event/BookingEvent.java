@@ -20,4 +20,5 @@ public class BookingEvent {
     private String status;
     private LocalDateTime createdAt;
     private String skills;
+    private String email;
 }

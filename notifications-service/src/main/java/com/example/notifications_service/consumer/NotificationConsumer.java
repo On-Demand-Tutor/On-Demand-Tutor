@@ -13,6 +13,7 @@ public class NotificationConsumer {
     @KafkaListener(topics = "booking-events", groupId = "notifications-service-group",containerFactory = "kafkaListenerContainerFactoryForBookingTutor")
     public void handleBookingEvent(BookingEvent event) {
         log.info("Received booking event: {}", event);
+        log.info("Student email: {}", event.getEmail());
         // TODO: Gửi email cho student & tutor
     }
 }

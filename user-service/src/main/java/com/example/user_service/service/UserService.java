@@ -205,4 +205,10 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
     }
 
+    public String getEmailByUserId(Long userId) {
+        return userRepository.findById(userId)
+                .map(User::getEmail)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+    }
+
 }

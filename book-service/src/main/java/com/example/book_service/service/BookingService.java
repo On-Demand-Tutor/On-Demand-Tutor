@@ -36,12 +36,15 @@ public class BookingService {
         Long userId = jwt.getClaim("userId");
         Long studentId=getStudentIdByUserId(userId);
         TutorResponse tutor = getTutorIdByUserId(tutorUserId);
+        String email = getEmailByUserId(userId);
+        log.info("đã gọi sang user-sservice");
 
         Booking booking = bookingMapper.toBooking(request);
         booking.setStudentId(studentId);
         booking.setTutorId(tutor.getId());
         booking.setStatus(BookingStatus.PENDING);
         booking.setCreatedAt(LocalDateTime.now());
+        booking.setEmail(email);
 
         Booking saved = bookingRepository.save(booking);
         BookingEvent event = BookingEvent.builder()
@@ -52,6 +55,7 @@ public class BookingService {
                 .status(saved.getStatus().name())
                 .createdAt(saved.getCreatedAt())
                 .skills(tutor.getSkills())
+                .email(email)
                 .build();
 
         kafkaTemplate.send("booking-events", event);
@@ -59,6 +63,11 @@ public class BookingService {
         log.info("sent to notifications roi nhe ok ok ok ok=========>>>>>>>");
 
         return bookingMapper.toResponseDTO(saved);
+    }
+
+    public String getEmailByUserId(Long userId) {
+        String url = "http://user-service:8080/api/users/email/" + userId;
+        return restTemplate.getForObject(url, String.class);
     }
 
     public Long getStudentIdByUserId(Long userId) {
@@ -71,15 +80,13 @@ public class BookingService {
     }
 
     public TutorResponse getTutorIdByUserId(Long tutorId) {
-        String url = "http://tutor-service:8080/api/tutors/" + tutorId;
+        String url = "http://tutor-service:8080/api/tutors/user/" + tutorId;
         TutorResponse tutor = restTemplate.getForObject(url, TutorResponse.class);
         if (tutor == null) {
             throw new RuntimeException("Tutor not found with id=" + tutorId);
         }
         return tutor;
     }
-
-
 
     public List<BookingResponseDTO> getAllBookings() {
         return bookingRepository.findAll()
