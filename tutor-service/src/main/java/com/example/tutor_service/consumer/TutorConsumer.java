@@ -4,6 +4,7 @@ package com.example.tutor_service.consumer;
 import com.example.tutor_service.dto.request.SearchTutorRequest;
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.TutorCreatedEvent;
+import com.example.tutor_service.event.TutorUpdatedEvent;
 import com.example.tutor_service.repository.TutorRepository;
 import com.example.tutor_service.service.TutorService;
 import lombok.RequiredArgsConstructor;

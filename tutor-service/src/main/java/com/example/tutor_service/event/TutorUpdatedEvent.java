@@ -1,4 +1,4 @@
-package com.example.user_service.event;
+package com.example.tutor_service.event;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
