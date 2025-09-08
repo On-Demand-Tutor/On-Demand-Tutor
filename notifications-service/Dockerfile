@@ -8,7 +8,7 @@ LABEL authors="congng"
 WORKDIR /app
 
 # Sao chép tệp JAR vào container
-COPY target/user-service-0.0.1-SNAPSHOT.jar /app/notifications-service-0.0.1-SNAPSHOT.jar
+COPY target/notifications-service-0.0.1-SNAPSHOT.jar /app/notifications-service-0.0.1-SNAPSHOT.jar
 
 # Expose port của ứng dụng
 EXPOSE 8003

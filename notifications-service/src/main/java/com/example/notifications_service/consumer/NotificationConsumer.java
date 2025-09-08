@@ -1,0 +1,18 @@
+package com.example.notifications_service.consumer;
+
+import com.example.notifications_service.event.BookingEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationConsumer {
+    @KafkaListener(topics = "booking-events", groupId = "notifications-service-group",containerFactory = "kafkaListenerContainerFactoryForBookingTutor")
+    public void handleBookingEvent(BookingEvent event) {
+        log.info("Received booking event: {}", event);
+        // TODO: Gửi email cho student & tutor
+    }
+}
