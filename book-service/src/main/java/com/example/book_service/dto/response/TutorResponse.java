@@ -7,4 +7,5 @@ public class TutorResponse {
     private Long id;
     private Long userId;
     private String skills;
+    private double price;
 }

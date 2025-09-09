@@ -8,18 +8,16 @@ import com.example.book_service.dto.response.TutorResponse;
 import com.example.book_service.entity.Booking;
 import com.example.book_service.enums.BookingStatus;
 import com.example.book_service.event.BookingEvent;
+import com.example.book_service.mapper.BookingMapper;
 import com.example.book_service.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
-import com.example.book_service.mapper.BookingMapper;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,9 +43,11 @@ public class BookingService {
         booking.setStatus(BookingStatus.PENDING);
         booking.setCreatedAt(LocalDateTime.now());
         booking.setEmail(email);
+        booking.setPrice(tutor.getPrice());
 
         Booking saved = bookingRepository.save(booking);
         BookingEvent event = BookingEvent.builder()
+                .bookingId(saved.getId())
                 .studentId(saved.getStudentId())
                 .tutorId(saved.getTutorId())
                 .startTime(saved.getStartTime())
@@ -56,11 +56,12 @@ public class BookingService {
                 .createdAt(saved.getCreatedAt())
                 .skills(tutor.getSkills())
                 .email(email)
+                .price(tutor.getPrice())
                 .build();
 
         kafkaTemplate.send("booking-events", event);
 
-        log.info("sent to notifications roi nhe ok ok ok ok=========>>>>>>>");
+        log.info("sent to payment service  roi nhe ok ok ok ok=========>>>>>>>");
 
         return bookingMapper.toResponseDTO(saved);
     }
@@ -86,18 +87,5 @@ public class BookingService {
             throw new RuntimeException("Tutor not found with id=" + tutorId);
         }
         return tutor;
-    }
-
-    public List<BookingResponseDTO> getAllBookings() {
-        return bookingRepository.findAll()
-                .stream()
-                .map(bookingMapper::toResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    public BookingResponseDTO getBookingById(Long id) {
-        return bookingRepository.findById(id)
-                .map(bookingMapper::toResponseDTO)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
     }
 }

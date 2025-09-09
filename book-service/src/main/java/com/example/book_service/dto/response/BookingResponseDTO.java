@@ -18,4 +18,5 @@ public class BookingResponseDTO {
     private BookingStatus status;
     private LocalDateTime createdAt;
     private String email;
+    private double price;
 }
