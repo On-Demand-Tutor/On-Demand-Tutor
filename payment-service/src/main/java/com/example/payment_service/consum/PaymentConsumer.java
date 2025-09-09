@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentConsume {
+public class PaymentConsumer {
     private final PaymentRepository paymentRepository;
     private final VNPayService vnPayService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -58,7 +58,6 @@ public class PaymentConsume {
                 .build();
 
         kafkaTemplate.send("payment-link-events", linkEvent);
-
 
         log.info("Đã tạo payment {} và gửi link sang notification-service", payment.getId());
     }

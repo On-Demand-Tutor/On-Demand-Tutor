@@ -1,6 +1,6 @@
 package com.example.notifications_service.configuration;
 
-import com.example.notifications_service.event.BookingEvent;
+import com.example.notifications_service.event.PaymentLinkCreatedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -42,8 +42,8 @@ public class KafkaConsumerConfig {
 
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, BookingEvent> kafkaListenerContainerFactoryForBookingTutor() {
-        return kafkaListenerContainerFactory(BookingEvent.class);
+    public ConcurrentKafkaListenerContainerFactory<String, PaymentLinkCreatedEvent> kafkaListenerContainerFactoryForPaymentLink() {
+        return kafkaListenerContainerFactory(PaymentLinkCreatedEvent.class);
     }
 
 }

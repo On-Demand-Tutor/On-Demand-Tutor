@@ -8,10 +8,10 @@ LABEL authors="congng"
 WORKDIR /app
 
 # Sao chép tệp JAR vào container
-COPY target/student-service-0.0.1-SNAPSHOT.jar /app/student-service-0.0.1-SNAPSHOT.jar
+COPY target/payment-service-0.0.1-SNAPSHOT.jar /app/payment-service-0.0.1-SNAPSHOT.jar
 
 # Expose port của ứng dụng
-EXPOSE 8080
+EXPOSE 8089
 
 # Câu lệnh để chạy ứng dụng
-ENTRYPOINT ["java", "-jar", "/app/student-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "/app/payment-service-0.0.1-SNAPSHOT.jar"]

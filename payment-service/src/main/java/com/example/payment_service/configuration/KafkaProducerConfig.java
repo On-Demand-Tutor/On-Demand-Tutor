@@ -1,4 +1,4 @@
-package com.example.chat_service.configuration;
+package com.example.payment_service.configuration;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

@@ -1,4 +1,4 @@
-package com.example.book_service.event;
+package com.example.payment_service.event;
 
 
 import lombok.AllArgsConstructor;

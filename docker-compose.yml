@@ -204,6 +204,27 @@ services:
       - my-network
     restart: unless-stopped
 
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8090:8080"
+    depends_on:
+      - kafka
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_payment_service?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - VNPAY_PAYURL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      - VNPAY_RETURNURL=http://localhost:8090/api/payments/vnpay/callback
+      - VNPAY_TMNCODE=F7530RRT
+      - VNPAY_HASHSECRET=6B7I7K9E9V770GRRRTP0XHMUOTSXSFBT
+    networks:
+      - my-network
+    restart: unless-stopped
 
 volumes:
   mysql_data:
