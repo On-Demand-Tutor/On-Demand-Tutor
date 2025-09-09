@@ -66,4 +66,10 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping("/email/{userId}")
+    public ResponseEntity<String> getEmailByUserId(@PathVariable Long userId) {
+        String email = userService.getEmailByUserId(userId);
+        return ResponseEntity.ok(email);
+    }
+
 }
