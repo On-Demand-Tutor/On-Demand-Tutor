@@ -14,10 +14,15 @@ public class EmailService {
     public void sendBookingNotification(String to, BookingEvent event) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("New Booking Created");
-        message.setText("Bạn có booking mới với tutorId=" + event.getSkills()
-                + " kỹ năng: " + event.getSkills()
-                + " từ " + event.getStartTime() + " đến " + event.getEndTime());
+        message.setSubject("📌 Thông báo Booking mới");
+
+        String body = "Bạn có một booking mới:\n\n"
+                + "📅 Thời gian: " + event.getStartTime() + " - " + event.getEndTime() + "\n"
+                + "✅ Trạng thái: " + event.getStatus() + "\n"
+                + "🕒 Ngày tạo: " + event.getCreatedAt() + "\n"
+                + "💡 Kỹ năng: " + event.getSkills() + "\n";
+
+        message.setText(body);
 
         javaMailSender.send(message);
     }
