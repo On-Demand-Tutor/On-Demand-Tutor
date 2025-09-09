@@ -1,5 +1,6 @@
 package com.example.user_service.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import com.example.user_service.enums.UserRole;
 import jakarta.validation.constraints.*;
 import lombok.*;
