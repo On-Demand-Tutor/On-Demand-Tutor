@@ -22,6 +22,7 @@ public class Payment {
     private Long id;
 
     private Long studentId;
+    private Long tutorId;
     private Long bookingId;
     private Double amount;
 

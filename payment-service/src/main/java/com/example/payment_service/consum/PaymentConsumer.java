@@ -27,6 +27,7 @@ public class PaymentConsumer {
         log.info("Nhận booking-event: {}", bookingEvent);
 
         Payment payment = Payment.builder()
+                .tutorId(bookingEvent.getTutorId())
                 .bookingId(bookingEvent.getBookingId())
                 .studentId(bookingEvent.getStudentId())
                 .amount(bookingEvent.getPrice())
@@ -36,10 +37,14 @@ public class PaymentConsumer {
 
         payment = paymentRepository.save(payment);
 
+        String orderInfo = String.format("Thanh toan khoa hoc - Booking %d - Skills: %s",
+                bookingEvent.getBookingId(),
+                bookingEvent.getSkills());
+
         String paymentUrl = vnPayService.buildPaymentUrl(
-                payment.getId().toString(),
+                payment.getBookingId().toString(),
                 bookingEvent.getPrice(),
-                "127.0.0.1"
+                orderInfo
         );
 
         // Gửi event chứa link sang notifications-service
@@ -59,6 +64,6 @@ public class PaymentConsumer {
 
         kafkaTemplate.send("payment-link-events", linkEvent);
 
-        log.info("Đã tạo payment {} và gửi link sang notification-service", payment.getId());
+        log.info("Đã tạo payment {} và gửi link sang notification-service", bookingEvent.getBookingId());
     }
 }

@@ -6,6 +6,8 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -27,7 +29,7 @@ public class VNPayService {
     @Value("${vnpay.returnUrl}")
     private String vnp_ReturnUrl;
 
-    public String buildPaymentUrl(String txnRef, Double amount , String clientIp) {
+    public String buildPaymentUrl(String txnRef, Double amount ,String orderInfo) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
 
@@ -35,11 +37,12 @@ public class VNPayService {
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Command", vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-        vnp_Params.put("vnp_Amount", String.valueOf(amount * 100)); // nhân 100 theo spec
-        vnp_Params.put("vnp_CreateDate", new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        vnp_Params.put("vnp_Amount", String.valueOf((int)(amount * 100)));
+        vnp_Params.put("vnp_CreateDate", new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         vnp_Params.put("vnp_CurrCode", "VND");
-        vnp_Params.put("vnp_IpAddr", clientIp != null ? clientIp : "127.0.0.1");
+        vnp_Params.put("vnp_IpAddr", "127.0.0.1");
         vnp_Params.put("vnp_Locale", "vn");
+        vnp_Params.put("vnp_OrderInfo", orderInfo);
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
         vnp_Params.put("vnp_TxnRef", txnRef);

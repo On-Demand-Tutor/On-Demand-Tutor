@@ -21,15 +21,15 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping("/vnpay/create")
-    public ResponseEntity<PaymentResponseDTO> create(
-            @RequestBody PaymentRequestDTO request,
-            @AuthenticationPrincipal Jwt jwt,
-            HttpServletRequest httpReq
-    ) {
-        return ResponseEntity.ok(paymentService.createPayment(request, jwt, httpReq));
-    }
-
+//    @PostMapping("/vnpay/create")
+//    public ResponseEntity<PaymentResponseDTO> create(
+//            @RequestBody PaymentRequestDTO request,
+//            @AuthenticationPrincipal Jwt jwt,
+//            HttpServletRequest httpReq
+//    ) {
+//        return ResponseEntity.ok(paymentService.createPayment(request, jwt, httpReq));
+//    }
+//
     // VNPay gọi về (GET)
     @GetMapping("/vnpay/callback")
     public ResponseEntity<String> callback(HttpServletRequest req) {
