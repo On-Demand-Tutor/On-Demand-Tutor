@@ -1,24 +1,20 @@
 package com.example.payment_service.service;
 
 
-import com.example.payment_service.dto.PaymentRequestDTO;
-import com.example.payment_service.dto.PaymentResponseDTO;
 import com.example.payment_service.entity.Payment;
 import com.example.payment_service.event.PaymentSuccessEvent;
 import com.example.payment_service.repository.PaymentRepository;
-import com.example.payment_service.util.VNPayUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -26,32 +22,6 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final VNPayService vnPayService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-
-//
-//    public PaymentResponseDTO createPayment(PaymentRequestDTO req, Jwt jwt, HttpServletRequest httpReq) {
-//        Long studentUserId = jwt.getClaim("userId");
-//        String txnRef = UUID.randomUUID().toString();
-//
-//        Payment payment = Payment.builder()
-//                .bookingId(req.getBookingId())
-//                .studentId(studentUserId)
-//                .amount(req.getAmount())
-//                .status("PENDING")
-//                .transactionId(txnRef)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//        paymentRepository.save(payment);
-//
-//        String clientIp = VNPayUtil.getIpAddress(httpReq);
-//
-//        String payUrl = vnPayService.buildPaymentUrl(txnRef, req.getAmount(), clientIp);
-//
-//        return PaymentResponseDTO.builder()
-//                .id(payment.getId())
-//                .redirectUrl(payUrl)
-//                .status(payment.getStatus())
-//                .build();
-//    }
 
     public boolean handleCallback(Map<String, String> params) {
         Map<String, String> fields = new HashMap<>(params);
@@ -82,14 +52,12 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         PaymentSuccessEvent event = PaymentSuccessEvent.builder()
-                .paymentId(payment.getId())
                 .bookingId(payment.getBookingId())
-                .studentId(payment.getStudentId())
-                .amount(payment.getAmount())
-                .paidAt(payment.getPaidAt())
                 .build();
 
-        kafkaTemplate.send("payment-events", event);
+        kafkaTemplate.send("payment-success-events", event);
+
+        log.info("đã gửi sang bên phía booking-serivce=====>>>>",event);
 
         return true;
     }

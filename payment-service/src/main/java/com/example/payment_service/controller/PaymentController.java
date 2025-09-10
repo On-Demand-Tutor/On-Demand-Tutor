@@ -1,15 +1,13 @@
 package com.example.payment_service.controller;
 
 
-import com.example.payment_service.dto.PaymentRequestDTO;
-import com.example.payment_service.dto.PaymentResponseDTO;
 import com.example.payment_service.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,15 +19,6 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-//    @PostMapping("/vnpay/create")
-//    public ResponseEntity<PaymentResponseDTO> create(
-//            @RequestBody PaymentRequestDTO request,
-//            @AuthenticationPrincipal Jwt jwt,
-//            HttpServletRequest httpReq
-//    ) {
-//        return ResponseEntity.ok(paymentService.createPayment(request, jwt, httpReq));
-//    }
-//
     // VNPay gọi về (GET)
     @GetMapping("/vnpay/callback")
     public ResponseEntity<String> callback(HttpServletRequest req) {
@@ -39,6 +28,6 @@ public class PaymentController {
 
         boolean ok = paymentService.handleCallback(params);
         if (!ok) return ResponseEntity.badRequest().body("Invalid signature");
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok("OK Đã thanh toán rồi giờ mày gửi event qua bên booking mà cập nhật đi =====>>>>>>>>");
     }
 }
