@@ -39,6 +39,13 @@ MOCK_BOOKINGS = {
         "student_id": "99999999-9999-9999-9999-999999999999",  # khác student
         "tutor_id":   "88888888-8888-8888-8888-888888888888",  # khác tutor
         "status": "done"
+    },
+    # Tạo thêm đánh giá với status = done:
+    "ffffffff-ffff-ffff-ffff-ffffffffffff": {
+    "id": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+    "student_id": "33333333-3333-3333-3333-333333333333",
+    "tutor_id":   "22222222-2222-2222-2222-222222222222",
+    "status": "done"
     }
 }
 

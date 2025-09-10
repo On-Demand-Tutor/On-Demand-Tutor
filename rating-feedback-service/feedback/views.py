@@ -3,7 +3,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Rating, Complaint
+from django.db.models import Avg
+from .models import Rating, Complaint, Tutor
 from .serializers import (
     RatingSerializer,
     ComplaintSerializer,
@@ -20,6 +21,19 @@ class RatingViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             return [IsStudent()]
         return [AllowAny()]  # Cho phép GET/HEAD list & retrieve tự do để test nhanh
+    def perform_create(self, serializer):
+        rating = serializer.save()
+        # Sau khi lưu Rating thì cập nhật điểm trung bình cho Tutor
+        avg = Rating.objects.filter(tutor_id=rating.tutor_id).aggregate(avg=Avg("score"))["avg"] or 0.0
+        tutor, _ = Tutor.objects.get_or_create(id=rating.tutor_id, defaults={"name": "N/A"})
+        tutor.average_score = round(avg, 2)
+        tutor.save()
+
+    @action(detail=True, methods=["get"], url_path="average")
+    def get_average(self, request, pk=None):
+        """GET /ratings/{tutor_id}/average"""
+        avg = Rating.objects.filter(tutor_id=pk).aggregate(avg=Avg("score"))["avg"]
+        return Response({"tutor_id": pk, "average_score": avg or 0.0})
 
 class ComplaintViewSet(viewsets.ModelViewSet):
     queryset = Complaint.objects.all().order_by("-created_at")
