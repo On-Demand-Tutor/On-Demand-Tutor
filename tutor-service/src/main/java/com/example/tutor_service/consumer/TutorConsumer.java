@@ -20,7 +20,7 @@ public class TutorConsumer {
     private final TutorService tutorService;
 
 
-    @KafkaListener(topics = "tutor-created", groupId = "tutor-service-group",containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "tutor-created", groupId = "tutor-service-group",containerFactory = "kafkaListenerContainerFactoryForCreateTutor")
     public void consumeTutorCreated(TutorCreatedEvent event) {
         System.out.println("Tutor Nhận được event từ Kafka rồi nhé ok ok ++++>>>: " + event);
         Tutor tutor = Tutor.builder()

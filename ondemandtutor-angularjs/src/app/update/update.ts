@@ -22,6 +22,7 @@ export class UpdateComponent implements OnInit {
   qualifications = '';              // tutor
   skills = '';                      // tutor
   teachingGrades = '';              // tutor
+  price: number | null = null;
 
   userRole: Role = '';
   isLoggedIn = false;
@@ -67,6 +68,7 @@ export class UpdateComponent implements OnInit {
             this.qualifications = u?.qualifications ?? this.qualifications;
             this.skills = u?.skills ?? this.skills;
             this.teachingGrades = u?.teachingGrades ?? this.teachingGrades;
+            this.price = u?.price != null ? Number(u.price) : this.price;
           }
         },
         error: (_err: any) => { /* bỏ qua nếu BE chưa có endpoint */ }
@@ -89,6 +91,9 @@ export class UpdateComponent implements OnInit {
       if (this.qualifications.trim()) payload.qualifications = this.qualifications.trim();
       if (this.skills.trim())          payload.skills = this.skills.trim();
       if (this.teachingGrades.trim())  payload.teachingGrades = this.teachingGrades.trim();
+      if (this.price !== null && !Number.isNaN(this.price)) {
+        payload.price = Number(this.price);
+      }
     }
     return payload;
   }

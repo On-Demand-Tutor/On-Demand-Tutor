@@ -89,6 +89,11 @@
         <input type="text" name="teachingGrades" [(ngModel)]="teachingGrades" [disabled]="userRole !== 'tutor'" />
       </label>
 
+      <label>
+        Price
+        <input type="number" name="price" [(ngModel)]="price" min="0" [disabled]="userRole !== 'tutor'"/>
+      </label>
+
       <button class="btn btn-primary" type="submit">
         {{ isLoading ? 'Đang lưu...' : 'Save Changes' }}
       </button>
