@@ -33,4 +33,5 @@ public class Booking {
 
     private LocalDateTime createdAt;
     private String email;
+    private double price;
 }

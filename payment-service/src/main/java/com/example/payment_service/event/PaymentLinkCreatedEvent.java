@@ -1,4 +1,4 @@
-package com.example.notifications_service.event;
+package com.example.payment_service.event;
 
 
 import lombok.AllArgsConstructor;
@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BookingEvent {
+public class PaymentLinkCreatedEvent {
+    private Long bookingId;
     private Long studentId;
     private Long tutorId;
     private LocalDateTime startTime;
@@ -21,4 +22,6 @@ public class BookingEvent {
     private LocalDateTime createdAt;
     private String skills;
     private String email;
+    private double price;
+    private String paymentUrl;
 }

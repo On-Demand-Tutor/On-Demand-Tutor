@@ -1,6 +1,7 @@
-package com.example.notifications_service.configuration;
+package com.example.payment_service.configuration;
 
-import com.example.notifications_service.event.PaymentLinkCreatedEvent;
+
+import com.example.payment_service.event.BookingEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,7 @@ public class KafkaConsumerConfig {
     private <T> ConsumerFactory<String, T> consumerFactory(Class<T> clazz) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "notifications-service-group");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-service-group");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
@@ -40,10 +41,10 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, PaymentLinkCreatedEvent> kafkaListenerContainerFactoryForPaymentLink() {
-        return kafkaListenerContainerFactory(PaymentLinkCreatedEvent.class);
+    public ConcurrentKafkaListenerContainerFactory<String, BookingEvent> paymentKafkaListenerContainerFactoryForBookingTutor() {
+        return kafkaListenerContainerFactory(BookingEvent.class);
     }
+
 
 }

@@ -27,15 +27,4 @@ public class BookingController {
     ) {
         return ResponseEntity.ok(bookingService.createBooking(tutorUserId, request, jwt));
     }
-
-
-    @GetMapping
-    public ResponseEntity<List<BookingResponseDTO>> getAllBookings() {
-        return ResponseEntity.ok(bookingService.getAllBookings());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<BookingResponseDTO> getBookingById(@PathVariable Long id) {
-        return ResponseEntity.ok(bookingService.getBookingById(id));
-    }
 }

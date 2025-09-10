@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class BookingEvent {
+    private Long bookingId;
     private Long studentId;
     private Long tutorId;
     private LocalDateTime startTime;
@@ -21,4 +22,5 @@ public class BookingEvent {
     private LocalDateTime createdAt;
     private String skills;
     private String email;
+    private double price;
 }

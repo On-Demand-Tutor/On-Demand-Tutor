@@ -1,6 +1,6 @@
 package com.example.notifications_service.consumer;
 
-import com.example.notifications_service.event.BookingEvent;
+import com.example.notifications_service.event.PaymentLinkCreatedEvent;
 import com.example.notifications_service.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +14,12 @@ public class NotificationConsumer {
 
     private final EmailService emailService;
 
-    @KafkaListener(topics = "booking-events", groupId = "notifications-service-group",containerFactory = "kafkaListenerContainerFactoryForBookingTutor")
-    public void handleBookingEvent(BookingEvent event) {
-        log.info("Received booking event: {}", event);
+
+    @KafkaListener(topics = "payment-link-events", groupId = "notifications-service-group",containerFactory = "kafkaListenerContainerFactoryForPaymentLink")
+    public void handlePaymentLinkEvent(PaymentLinkCreatedEvent event) {
+        log.info("Received payment link event: {}", event);
         log.info("Student email: {}", event.getEmail());
-        emailService.sendBookingNotification(event.getEmail(), event);
+
+        emailService.sendPaymentLinkEmail(event.getEmail(), event);
     }
 }
