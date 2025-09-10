@@ -55,3 +55,14 @@ class Complaint(models.Model):
 
     def __str__(self):
         return f"{self.id} • {self.status}"
+
+class Tutor(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)  # Giữ lại id nếu đồng bộ từ user-service
+    average_score = models.FloatField(default=0.0)
+
+    class Meta:
+        db_table = "tutors"
+
+    def __str__(self):
+        return f"{self.id} - {self.average_score}"
