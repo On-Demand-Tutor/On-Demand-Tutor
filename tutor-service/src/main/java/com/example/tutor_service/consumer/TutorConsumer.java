@@ -20,7 +20,7 @@ public class TutorConsumer {
     private final TutorService tutorService;
 
 
-    @KafkaListener(topics = "tutor-created", groupId = "tutor-service-group",containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "tutor-created", groupId = "tutor-service-group",containerFactory = "kafkaListenerContainerFactoryForCreateTutor")
     public void consumeTutorCreated(TutorCreatedEvent event) {
         System.out.println("Tutor Nhận được event từ Kafka rồi nhé ok ok ++++>>>: " + event);
         Tutor tutor = Tutor.builder()
@@ -54,7 +54,7 @@ public class TutorConsumer {
         tutorRepository.save(tutor);
     }
 
-    @KafkaListener(topics = "search-tutor", groupId = "tutor-service-service", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
+    @KafkaListener(topics = "search-tutor", groupId = "tutor-service-group", containerFactory = "kafkaListenerContainerFactoryForSearchTutor")
     public void handleSearchTutor(SearchTutorRequest request) {
         System.out.println("Nhận event từ student-service: " + request);
 
