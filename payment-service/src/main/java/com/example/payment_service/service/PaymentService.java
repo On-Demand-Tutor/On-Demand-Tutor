@@ -27,6 +27,32 @@ public class PaymentService {
     private final VNPayService vnPayService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
+//
+//    public PaymentResponseDTO createPayment(PaymentRequestDTO req, Jwt jwt, HttpServletRequest httpReq) {
+//        Long studentUserId = jwt.getClaim("userId");
+//        String txnRef = UUID.randomUUID().toString();
+//
+//        Payment payment = Payment.builder()
+//                .bookingId(req.getBookingId())
+//                .studentId(studentUserId)
+//                .amount(req.getAmount())
+//                .status("PENDING")
+//                .transactionId(txnRef)
+//                .createdAt(LocalDateTime.now())
+//                .build();
+//        paymentRepository.save(payment);
+//
+//        String clientIp = VNPayUtil.getIpAddress(httpReq);
+//
+//        String payUrl = vnPayService.buildPaymentUrl(txnRef, req.getAmount(), clientIp);
+//
+//        return PaymentResponseDTO.builder()
+//                .id(payment.getId())
+//                .redirectUrl(payUrl)
+//                .status(payment.getStatus())
+//                .build();
+//    }
+
     public boolean handleCallback(Map<String, String> params) {
         Map<String, String> fields = new HashMap<>(params);
         String vnp_SecureHash = fields.remove("vnp_SecureHash");
@@ -38,7 +64,8 @@ public class PaymentService {
         }
 
         String responseCode = params.get("vnp_ResponseCode");
-        String txnRef = params.get("vnp_TxnRef");
+        String txnRefStr = params.get("vnp_TxnRef");
+        long txnRef = Long.parseLong(txnRefStr);
         String transactionNo = params.get("vnp_TransactionNo");
 
         Payment payment = paymentRepository.findByBookingId(txnRef)
