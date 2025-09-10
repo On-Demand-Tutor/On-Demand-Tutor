@@ -46,8 +46,5 @@ media/
 .coverage
 htmlcov/
 
-# Environment file (thực tế)
-.env
-
 # Migration cache (chỉ bỏ pycache, giữ file .py)
 */migrations/__pycache__/
