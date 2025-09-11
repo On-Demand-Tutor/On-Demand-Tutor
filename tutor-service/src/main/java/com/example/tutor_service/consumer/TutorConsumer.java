@@ -4,6 +4,7 @@ import com.example.tutor_service.dto.request.SearchTutorRequest;
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.TutorCreatedEvent;
 import com.example.tutor_service.event.TutorUpdatedEvent;
+import com.example.tutor_service.event.TutorDeletedEvent;
 import com.example.tutor_service.repository.TutorRepository;
 import com.example.tutor_service.service.TutorService;
 import lombok.RequiredArgsConstructor;
@@ -67,4 +68,9 @@ public class TutorConsumer {
         System.out.println("Đã xử lý và gửi response về student-service với requestId=" + request.getRequestId());
     }
 
+    @KafkaListener(topics = "tutor-deleted", groupId = "tutor-service-group", containerFactory = "kafkaListenerContainerFactoryForDeleteTutor")
+    public void consumeTutorDeleted(TutorDeletedEvent event) {
+        System.out.println("Tutor Nhận được event delete từ Kafka rồi nhé ok ok ++++>>>: " + event);
+        tutorService.deleteTutorByUserId(event.getUserId());
+    }
 }

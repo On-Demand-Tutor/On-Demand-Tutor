@@ -6,7 +6,7 @@ import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.ChatMessageEvent;
 import com.example.tutor_service.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -70,5 +70,13 @@ public class TutorService {
 
         kafkaTemplate.send("search-user-for-tutors", response);
         System.out.println("Đã gửi response sang user-service để enrich username: " + response);
+    }
+
+    @Transactional
+    public void deleteTutorByUserId(Long userId) {
+        if (tutorRepository.existsByUserId(userId)) {
+            tutorRepository.deleteByUserId(userId);
+            System.out.println("Đã xóa tutor với userId=" + userId);
+        }
     }
 }

@@ -11,6 +11,7 @@ import com.example.user_service.event.StudentCreatedEvent;
 import com.example.user_service.event.StudentUpdatedEvent;
 import com.example.user_service.event.TutorCreatedEvent;
 import com.example.user_service.event.TutorUpdatedEvent;
+import com.example.user_service.event.TutorDeletedEvent;
 import com.example.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.List;
@@ -210,5 +216,19 @@ public class UserService {
                 .map(User::getEmail)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
     }
+   
+    @Transactional
+    public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found: " + userId);
+        }
 
+        userRepository.deleteById(userId);
+        log.info("Deleted user {}", userId);
+
+        // Gửi event luôn sau khi xóa
+        TutorDeletedEvent event = new TutorDeletedEvent(userId);
+        kafkaTemplate.send("tutor-deleted", event);
+        log.info("Published tutor-deleted event for userId={}", userId);
+    }
 }

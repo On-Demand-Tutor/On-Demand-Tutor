@@ -4,6 +4,7 @@ package com.example.tutor_service.configuration;
 import com.example.tutor_service.dto.request.SearchTutorRequest;
 import com.example.tutor_service.event.TutorCreatedEvent;
 import com.example.tutor_service.event.TutorUpdatedEvent;
+import com.example.tutor_service.event.TutorDeletedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -52,6 +53,11 @@ public class KafkaConsumerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, TutorUpdatedEvent> kafkaListenerContainerFactoryForUpdateTutor() {
         return kafkaListenerContainerFactory(TutorUpdatedEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, TutorDeletedEvent> kafkaListenerContainerFactoryForDeleteTutor() {
+        return kafkaListenerContainerFactory(TutorDeletedEvent.class);
     }
 
     @Bean
