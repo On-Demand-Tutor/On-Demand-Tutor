@@ -103,11 +103,6 @@ services:
       - DB_PASSWORD=123456
     volumes:
       - ./rating-feedback-service:/app
-    command: >
-      sh -c "
-      python manage.py migrate &&
-      gunicorn rating_feedback.wsgi:application --bind 0.0.0.0:8000
-      "
     networks:
       - my-network
 
