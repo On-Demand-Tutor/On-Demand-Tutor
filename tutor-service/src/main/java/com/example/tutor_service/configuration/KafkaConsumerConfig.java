@@ -3,7 +3,6 @@ package com.example.tutor_service.configuration;
 
 import com.example.tutor_service.dto.request.SearchTutorRequest;
 import com.example.tutor_service.event.TutorCreatedEvent;
-import com.example.tutor_service.event.TutorRatingEvent;
 import com.example.tutor_service.event.TutorUpdatedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -58,11 +57,6 @@ public class KafkaConsumerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, SearchTutorRequest> kafkaListenerContainerFactoryForSearchTutor() {
         return kafkaListenerContainerFactory(SearchTutorRequest.class);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TutorRatingEvent> kafkaListenerContainerFactoryForRateTutor() {
-        return kafkaListenerContainerFactory(TutorRatingEvent.class);
     }
 
 }
