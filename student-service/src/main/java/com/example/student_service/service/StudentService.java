@@ -89,6 +89,7 @@ public class StudentService {
 
 
     public void rateTutor(Long tutorUserId, Long userId, Double rating, String comment) {
+        log.info("=============>>>>>>>>dang o ben phia StudentSerrvice");
 
         Student student = getStudentByUserId(userId);
         Long studentId = student.getId();
@@ -100,8 +101,9 @@ public class StudentService {
             throw new IllegalArgumentException("You cannot rate this tutor without a booking!");
         }
 
-        TutorRatingEvent event = new TutorRatingEvent(tutorUserId, userId, rating, comment);
+        TutorRatingEvent event = new TutorRatingEvent(tutorId, studentId, rating, comment);
         kafkaTemplate.send("tutor-rating", event);
+        log.info("sent event ===>>>>>tutor service=====>>>>");
     }
 
 

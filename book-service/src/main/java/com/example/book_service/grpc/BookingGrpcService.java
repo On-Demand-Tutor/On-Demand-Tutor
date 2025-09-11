@@ -1,5 +1,6 @@
 package com.example.book_service.grpc;
 
+import com.example.book_service.enums.BookingStatus;
 import com.example.book_service.repository.BookingRepository;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,11 @@ public class BookingGrpcService extends BookingServiceGrpc.BookingServiceImplBas
                              StreamObserver<CheckBookingResponse> responseObserver) {
 
         boolean exists = bookingRepository
-                .findByStudentIdAndTutorId(request.getStudentId(), request.getTutorId())
-                .isPresent();
+                .existsByStudentIdAndTutorIdAndStatus(
+                        request.getStudentId(),
+                        request.getTutorId(),
+                        BookingStatus.CONFIRMED
+                );
 
         CheckBookingResponse response = CheckBookingResponse.newBuilder()
                 .setExists(exists)
