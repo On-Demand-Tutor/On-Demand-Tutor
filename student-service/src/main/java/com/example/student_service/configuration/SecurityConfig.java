@@ -28,7 +28,8 @@ public class SecurityConfig {
                                 "/api/students/{userId}",
                                 "/api/students/search-tutor",
                                 "/api/students/chat/send-message/{receiverId}",
-                                "/api/students/verify/{userId}"
+                                "/api/students/verify/{userId}",
+                                "/api/students/rating/{tutorUserId}"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
