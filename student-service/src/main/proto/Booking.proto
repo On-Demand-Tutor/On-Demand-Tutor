@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.student_service.grpc";
+option java_outer_classname = "BookingProto";
+
+service BookingService {
+  rpc CheckBooking(CheckBookingRequest) returns (CheckBookingResponse);
+}
+
+message CheckBookingRequest {
+  int64 studentId = 1;
+  int64 tutorId = 2;
+}
+
+message CheckBookingResponse {
+  bool exists = 1;
+}

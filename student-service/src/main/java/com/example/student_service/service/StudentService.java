@@ -5,6 +5,8 @@ import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.dto.response.TutorResponse;
 import com.example.student_service.entity.Student;
 import com.example.student_service.event.ChatMessageEvent;
+import com.example.student_service.event.TutorRatingEvent;
+import com.example.student_service.grpc.StudentGrpcService;
 import com.example.student_service.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 
 public class StudentService {
+    private final StudentGrpcService studentGrpcService;
 
     private final RestTemplate restTemplate;
 
@@ -82,6 +85,25 @@ public class StudentService {
 
     public boolean verifyStudent(Long id) {
         return studentRepository.findById(id).isPresent();
+    }
+
+
+    public void rateTutor(Long tutorUserId, Long userId, Double rating, String comment) {
+        log.info("=============>>>>>>>>dang o ben phia StudentSerrvice");
+
+        Student student = getStudentByUserId(userId);
+        Long studentId = student.getId();
+
+        Long tutorId = getTutorIdByUserId(tutorUserId);
+        boolean exists = studentGrpcService.checkBooking(studentId, tutorId);
+
+        if (!exists) {
+            throw new IllegalArgumentException("You cannot rate this tutor without a booking!");
+        }
+
+        TutorRatingEvent event = new TutorRatingEvent(tutorId, studentId, rating, comment);
+        kafkaTemplate.send("tutor-rating", event);
+        log.info("sent event ===>>>>>tutor service=====>>>>");
     }
 
 

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService, Role } from '../auth';
+import { TutorService, Tutor } from '../core/tutor.service';
 
 @Component({
   selector: 'app-update',
@@ -22,24 +23,28 @@ export class UpdateComponent implements OnInit {
   qualifications = '';              // tutor
   skills = '';                      // tutor
   teachingGrades = '';              // tutor
+  price: number | null = null;
 
   userRole: Role = '';
   isLoggedIn = false;
 
-  isFetching = false;  // load profile
-  isLoading  = false;  // save
+  isFetching = false;
+  isLoading  = false;
 
   successMessage = '';
   errorMessage = '';
   isAvatarMenuOpen = false;
 
-  constructor(public authService: AuthService, private router: Router) {}
+  constructor(
+    public authService: AuthService,
+    private router: Router,
+    private tutorService: TutorService
+  ) {}
 
   ngOnInit() {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (!this.isLoggedIn) return;
 
-    // đảm bảo có role & userId
     this.userRole = this.authService.getUserRole() || this.authService.ensureRoleFromTokenIfMissing();
     this.authService.ensureUserIdFromTokenIfMissing();
 
@@ -47,7 +52,6 @@ export class UpdateComponent implements OnInit {
     if (uid != null) this.loadProfile(uid);
   }
 
-  // (tuỳ chọn) nếu BE có GET /api/users/{id}
   loadProfile(userId: number) {
     this.isFetching = true;
     this.authService.getUserById(userId)
@@ -67,9 +71,10 @@ export class UpdateComponent implements OnInit {
             this.qualifications = u?.qualifications ?? this.qualifications;
             this.skills = u?.skills ?? this.skills;
             this.teachingGrades = u?.teachingGrades ?? this.teachingGrades;
+            this.price = u?.price != null ? Number(u.price) : this.price;
           }
         },
-        error: (_err: any) => { /* bỏ qua nếu BE chưa có endpoint */ }
+        error: () => {}
       });
   }
 
@@ -77,7 +82,6 @@ export class UpdateComponent implements OnInit {
     const payload: any = {};
     const username = this.username?.trim();
     const password = this.password?.trim();
-
     if (username) payload.username = username;
     if (password) payload.password = password;
 
@@ -89,6 +93,9 @@ export class UpdateComponent implements OnInit {
       if (this.qualifications.trim()) payload.qualifications = this.qualifications.trim();
       if (this.skills.trim())          payload.skills = this.skills.trim();
       if (this.teachingGrades.trim())  payload.teachingGrades = this.teachingGrades.trim();
+      if (this.price !== null && !Number.isNaN(this.price)) {
+        payload.price = Number(this.price);
+      }
     }
     return payload;
   }
@@ -103,7 +110,6 @@ export class UpdateComponent implements OnInit {
       return;
     }
 
-    // validate client (giúp tránh 400 không đáng có)
     if (this.userRole === 'student' && this.grade !== null) {
       const g = Number(this.grade);
       if (Number.isNaN(g) || g < 1 || g > 12) {
@@ -124,7 +130,30 @@ export class UpdateComponent implements OnInit {
       .subscribe({
         next: () => {
           this.successMessage = 'Cập nhật hồ sơ thành công!';
-          this.password = ''; // không lưu mật khẩu ở UI
+          this.password = '';
+
+          // Đồng bộ sang danh sách tutor (nếu là tutor)
+          if (this.userRole === 'tutor') {
+            const t: Tutor = {
+              id: userId,
+              name: this.username || 'Tutor',
+              description: this.qualifications || this.skills || '',
+              rating: 5,
+              subjects: [
+                ...((this.skills || '').split(',').map(s => s.trim()).filter(Boolean)),
+                ...((this.teachingGrades || '').split(',').map(s => s.trim()).filter(Boolean))
+              ],
+              verified: true,
+              avatar: ''
+            };
+            this.tutorService.upsertLocal(t);
+          }
+
+          // RẤT QUAN TRỌNG: refresh từ BE để mọi account/thiết bị thấy
+          this.tutorService.refresh();
+
+          // điều hướng về trang tìm kiếm
+          this.router.navigateByUrl('/search_tutor');
         },
         error: (err: any) => {
           const raw =
@@ -146,6 +175,10 @@ export class UpdateComponent implements OnInit {
   toggleAvatarMenu() { this.isAvatarMenuOpen = !this.isAvatarMenuOpen; }
   logout() { this.authService.logout(); this.router.navigate(['/login']); }
 
-  @HostListener('document:click', ['$event'])
-  onDocClick(_e: MouseEvent) { if (this.isAvatarMenuOpen) this.isAvatarMenuOpen = false; }
+@HostListener('document:click', ['$event'])
+onDocClick(ev: MouseEvent) {
+  if (this.isAvatarMenuOpen) {
+    this.isAvatarMenuOpen = false;
+  }
+}
 }

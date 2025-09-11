@@ -1,6 +1,5 @@
 package com.example.tutor_service.consumer;
 
-
 import com.example.tutor_service.dto.request.SearchTutorRequest;
 import com.example.tutor_service.entity.Tutor;
 import com.example.tutor_service.event.TutorCreatedEvent;
@@ -67,4 +66,5 @@ public class TutorConsumer {
 
         System.out.println("Đã xử lý và gửi response về student-service với requestId=" + request.getRequestId());
     }
+
 }
