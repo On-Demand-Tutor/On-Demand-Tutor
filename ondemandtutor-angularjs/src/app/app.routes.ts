@@ -3,6 +3,7 @@ import { HomeComponent } from './home/home';
 import { LoginComponent } from './login/login';
 import { RegisterComponent } from './register/register';
 import { UpdateComponent } from './update/update';
+import { SearchTutorComponent } from './search_tutor/search_tutor';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -10,4 +11,5 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'update', component: UpdateComponent },
+  { path: 'search_tutor', component: SearchTutorComponent },
 ];
