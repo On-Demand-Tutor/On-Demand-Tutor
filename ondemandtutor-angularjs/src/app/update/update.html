@@ -4,7 +4,7 @@
     <nav>
       <ul>
         <li><a href="home">Trang chủ </a></li>
-        <li><a href="tutors">Tìm gia sư </a></li>
+        <li><a routerLink="/search_tutor">Tìm gia sư </a></li>
         <li><a href="about">Về chúng tôi </a></li>
         <li><a href="contact">Liên hệ</a></li>
       </ul>
@@ -87,6 +87,11 @@
       <label>
         Teaching Grades
         <input type="text" name="teachingGrades" [(ngModel)]="teachingGrades" [disabled]="userRole !== 'tutor'" />
+      </label>
+
+      <label>
+        Price
+        <input type="number" name="price" [(ngModel)]="price" min="0" [disabled]="userRole !== 'tutor'"/>
       </label>
 
       <button class="btn btn-primary" type="submit">

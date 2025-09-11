@@ -4,7 +4,7 @@
     <nav>
       <ul>
         <li><a href="home">Trang chủ</a></li>
-        <li><a href="tutors">Tìm gia sư</a></li>
+        <li><a routerLink="/search_tutor">Tìm gia sư</a></li>
         <li><a href="about">Về chúng tôi</a></li>
         <li><a href="contact">Liên hệ</a></li>
       </ul>
@@ -40,7 +40,7 @@
     <h1>Học tập hiệu quả,<br> cùng gia sư chuyên nghiệp.</h1>
     <p>Tìm kiếm gia sư lý tưởng cho mọi môn học và mọi trình độ. Học trực tuyến dễ dàng mọi lúc, mọi nơi.</p>
     <!-- Ẩn nút Tìm gia sư ngay nếu là tutor -->
-    <a href="tutors" class="btn-primary" *ngIf="userRole !== 'tutor'">Tìm gia sư ngay</a>
+    <a routerLink="/search_tutor" class="btn-primary" *ngIf="userRole !== 'tutor'">Tìm gia sư ngay</a>
   </div>
 </section>
 
