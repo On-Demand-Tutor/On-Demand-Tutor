@@ -1,106 +1,181 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// src/app/search_tutor/search_tutor.ts
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TutorService, Tutor } from '../core/tutor.service';
-import {
-  Subscription, combineLatest, map,
-  interval, switchMap, Subject, takeUntil
-} from 'rxjs';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
+type TutorCard = {
+  id: number;
+  name: string;
+  rating: number;
+  description: string;
+  subjects: string[];
+  avatar?: string;
+  verified?: boolean;
+};
 
 @Component({
   selector: 'app-search-tutor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './search_tutor.html',
   styleUrls: ['./search_tutor.css']
 })
-export class SearchTutorComponent implements OnInit, OnDestroy {
-  constructor(private tutorService: TutorService, private router: Router) {}
-
+export class SearchTutorComponent implements OnInit {
+  // form
   keyword = '';
-  pageSize = 4;
 
-  currentPage = 1;
+  // trạng thái UI
+  hasSearched = false;
+  isLoading = false;
+  errorMessage = '';
+
+  // dữ liệu hiển thị
+  pagedResults: TutorCard[] = [];     
+  filteredResults: TutorCard[] = [];  
+  totalTutors = 0;                    
+
+  // phân trang (server-side)
+  pageSize = 8;            
+  currentPage = 1;             
   totalPages = 1;
   pages: number[] = [];
-  totalTutors = 0;
 
-  filteredResults: Tutor[] = [];
-  pagedResults: Tutor[] = [];
+  // Nếu BE dùng page 0-based (Spring Data mặc định) đặt true
+  backendPageZeroBased = true
 
-  private sub?: Subscription;
-  private destroy$ = new Subject<void>();
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
-  ngOnInit() {
-    // tải lần đầu
-    this.tutorService.loadAll().subscribe();
+  ngOnInit(): void {
+    // Đọc query params ?q=...&page=...
+    this.route.queryParamMap.subscribe(q => {
+      const qkw = (q.get('q') || '').trim();       
+      const p = Number(q.get('page') || '1') || 1;
 
-    // subscribe store -> filter + phân trang
-    this.sub = combineLatest([this.tutorService.tutors$]).pipe(
-      map(([list]) => {
-        const kw = (this.keyword || '').trim().toLowerCase();
-        const filtered = kw
-          ? list.filter(t =>
-              t.name.toLowerCase().includes(kw) ||
-              (t.subjects || []).some(s => s.toLowerCase().includes(kw))
-            )
-          : list;
+      this.keyword = qkw;
+      this.currentPage = p;
 
-        this.totalTutors = list.length;
-        this.filteredResults = filtered;
-
-        // giữ trang hợp lệ
-        if ((this.currentPage - 1) * this.pageSize >= filtered.length) {
-          this.currentPage = 1;
-        }
-        this.updatePagination();
-        return filtered;
-      })
-    ).subscribe();
-
-    // Reload khi quay lại route /search_tutor (kể cả component tái sử dụng)
-    this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd),
-      takeUntil(this.destroy$)
-    ).subscribe((e: any) => {
-      if (e.urlAfterRedirects?.includes('/search_tutor')) {
-        this.tutorService.loadAll(this.keyword).subscribe();
+      if (qkw !== '' || q.has('q')) {
+        this.hasSearched = true;
+        this.fetchServerPage();
+      } else {
+        this.resetView();
       }
     });
-
-    // Fallback: polling 30s để các tài khoản/thiết bị khác tự thấy (khi chưa có SSE)
-    interval(30000).pipe(
-      takeUntil(this.destroy$),
-      switchMap(() => this.tutorService.loadAll(this.keyword))
-    ).subscribe();
   }
 
-  ngOnDestroy() {
-    this.sub?.unsubscribe();
-    this.destroy$.next(); this.destroy$.complete();
+  search(): void {
+    const q = (this.keyword || '').trim();
+    this.hasSearched = true; 
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q, page: 1 },
+      queryParamsHandling: 'merge'
+    });
   }
 
-  search() {
-    // lọc cục bộ; nếu muốn tìm server-side: this.tutorService.loadAll(this.keyword).subscribe();
-    this.currentPage = 1;
-    this.updatePagination();
+  private fetchServerPage(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const apiPage = this.backendPageZeroBased ? (this.currentPage - 1) : this.currentPage;
+
+    const body = {
+      keyword: this.keyword || '',  
+      page: apiPage,
+      size: this.pageSize
+    };
+
+    this.http.post<any>('/api/students/search-tutor', body).subscribe({
+      next: (res) => {
+        const list = Array.isArray(res?.tutors) ? res.tutors : [];
+        const total = Number(res?.totalElements ?? 0);
+
+        const cards: TutorCard[] = list.map((u: any) => {
+          const subjects = [
+            ...(u?.skills ? String(u.skills).split(/[;,/]/) : []),
+            ...(u?.teachingGrades ? String(u.teachingGrades).split(/[;,/]/) : [])
+          ]
+            .map((s: string) => s.trim())
+            .filter(Boolean);
+
+          return {
+            id: Number(u?.userId ?? u?.id ?? 0),
+            name: String(u?.username ?? u?.name ?? ''),
+            rating: Number(u?.rating ?? 5),
+            description: this.buildDescription(u),
+            subjects,
+            avatar: u?.avatar ?? 'https://via.placeholder.com/80',
+            verified: true
+          };
+        });
+
+        this.pagedResults = cards;
+        this.filteredResults = cards;
+
+        this.totalTutors = total;
+        this.totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+        this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('search-tutor error:', err);
+        this.isLoading = false;
+        this.errorMessage =
+          err?.status === 0 ? 'Không kết nối được máy chủ.' :
+          err?.status === 401 ? 'Bạn không có quyền truy cập tính năng này.' :
+          'Không tải được danh sách gia sư.';
+
+        // vẫn giữ khu vực kết quả nhưng rỗng
+        this.resetView(true);
+      }
+    });
   }
 
-  updatePagination() {
-    const len = this.filteredResults.length;
-    this.totalPages = Math.max(1, Math.ceil(len / this.pageSize));
-    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-    this.goToPage(this.currentPage);
+  // Mô tả ngắn cho card
+  private buildDescription(u: any): string {
+    const skill = u?.skills ? `Môn: ${u.skills}` : '';
+    const grades = u?.teachingGrades ? `; Khối: ${u.teachingGrades}` : '';
+    const price = (typeof u?.price === 'number')
+      ? `; Học phí: ${this.formatVND(u.price)}`
+      : '';
+    return `${skill}${grades}${price}`.replace(/^; /, '');
   }
 
-  goToPage(p: number) {
+  private formatVND(n: number): string {
+    try {
+      return n.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+    } catch {
+      return `${n}₫`;
+    }
+  }
+
+  private resetView(keepHasSearched = false): void {
+    this.pagedResults = [];
+    this.filteredResults = [];
+    this.totalTutors = 0;
+    this.totalPages = 1;
+    this.pages = [1];
+    if (!keepHasSearched) this.hasSearched = false;
+  }
+
+  // Điều hướng phân trang
+  goToPage(p: number): void {
+    if (p < 1 || p > this.totalPages) return;
     this.currentPage = p;
-    const start = (p - 1) * this.pageSize;
-    this.pagedResults = this.filteredResults.slice(start, start + this.pageSize);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: p },
+      queryParamsHandling: 'merge'
+    }).then(() => this.fetchServerPage());
   }
-
-  prevPage() { if (this.currentPage > 1) this.goToPage(this.currentPage - 1); }
-  nextPage() { if (this.currentPage < this.totalPages) this.goToPage(this.currentPage + 1); }
+  prevPage(): void { this.goToPage(this.currentPage - 1); }
+  nextPage(): void { this.goToPage(this.currentPage + 1); }
 }

@@ -7,7 +7,7 @@ export type Role = 'student' | 'tutor' | 'admin' | 'moderator' | '';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = environment.apiUrls.userService; // ví dụ: '/api/users'
+  private apiUrl = environment.apiUrls.userService; // '/api/users'
 
   constructor(private http: HttpClient) {}
 
@@ -18,27 +18,14 @@ export class AuthService {
       .pipe(tap((res) => this.setSession(res)));
   }
 
-  // rawRole gửi UPPERCASE: 'STUDENT' | 'TUTOR' | 'MODERATOR'
-  register(
-    username: string,
-    email: string,
-    password: string,
-    rawRole: string
-  ): Observable<any> {
-    // Lưu pendingRole để FE có thể tạm hiển thị role nếu BE chưa trả role trong token
+  register(username: string, email: string, password: string, rawRole: string): Observable<any> {
     const pending = this.normalizeRole(rawRole);
     if (pending) localStorage.setItem('pendingRole', pending);
-    if (email) localStorage.setItem('pendingEmail', email); // tiện autofill màn login
-
-    return this.http.post<any>(`${this.apiUrl}/register`, {
-      username,
-      email,
-      password,
-      role: rawRole,
-    });
+    if (email) localStorage.setItem('login_email', email); // để fallback
+    return this.http.post<any>(`${this.apiUrl}/register`, { username, email, password, role: rawRole });
   }
 
-  // ===== SESSION =====
+  // ===== SESSION / HELPERS =====
   private normalizeRole(raw: any): Role {
     if (!raw) return '';
     const v = String(raw).toLowerCase().replace(/^role_/, '');
@@ -53,10 +40,7 @@ export class AuthService {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return null;
-      const payload = JSON.parse(
-        atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
-      );
-      return payload;
+      return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
     } catch {
       return null;
     }
@@ -65,21 +49,9 @@ export class AuthService {
   private extractRoleFromToken(token: string): Role {
     const p = this.decodeJwt(token);
     if (!p) return '';
-    const candidates = [
-      p.role,
-      p.roles,
-      p.authorities,
-      p.scope,
-      p.scopes,
-      p['cognito:groups'],
-    ].filter(Boolean);
-
-    for (const c of candidates) {
-      const arr = Array.isArray(c)
-        ? c
-        : String(c)
-            .split(/[ ,]/)
-            .filter(Boolean);
+    const cands = [p.role, p.roles, p.authorities, p.scope, p.scopes, p['cognito:groups']].filter(Boolean);
+    for (const c of cands) {
+      const arr = Array.isArray(c) ? c : String(c).split(/[ ,]/).filter(Boolean);
       for (const it of arr) {
         const r = this.normalizeRole(it);
         if (r) return r;
@@ -89,118 +61,70 @@ export class AuthService {
   }
 
   private setSession(res: any) {
-    // BE có thể trả: { result: { token, authenticated }, user, userId, ... }
-    const token =
-      res?.result?.token ??
-      res?.token ??
-      res?.accessToken ??
-      res?.jwt ??
-      null;
+    const token = res?.result?.token ?? res?.token ?? res?.accessToken ?? res?.jwt ?? null;
+    const user  = res?.user ?? res?.result?.user ?? res?.data?.user ?? {};
+    const uid   = user?.id ?? res?.userId ?? res?.result?.userId ?? res?.data?.userId ?? null;
+    const uname = user?.username ?? res?.username ?? res?.result?.username ?? res?.data?.username ?? null;
+    const email = user?.email ?? res?.email ?? res?.result?.email ?? res?.data?.email ?? null;
 
-    const user = res?.user ?? res?.result?.user ?? res?.data?.user ?? {};
-    const userId =
-      user?.id ?? res?.userId ?? res?.result?.userId ?? res?.data?.userId ?? null;
-    const username =
-      user?.username ??
-      res?.username ??
-      res?.result?.username ??
-      res?.data?.username ??
-      null;
+    let role = this.normalizeRole(user?.role ?? res?.role ?? res?.result?.role ?? res?.data?.role ?? null);
 
-    let role = this.normalizeRole(
-      user?.role ?? res?.role ?? res?.result?.role ?? res?.data?.role ?? null
-    );
-
-    if (token) localStorage.setItem('jwt', String(token));
-    if (userId != null) localStorage.setItem('userId', String(userId));
-    if (username) localStorage.setItem('username', String(username));
+    if (token) {
+      localStorage.setItem('jwt', String(token));
+      localStorage.setItem('access_token', String(token)); // để tương thích
+    }
+    if (uid != null) localStorage.setItem('userId', String(uid));
+    if (uname) localStorage.setItem('username', String(uname));
+    if (email) localStorage.setItem('login_email', String(email));
 
     if (!role && token) role = this.extractRoleFromToken(token);
-    if (!role) {
-      const pending = localStorage.getItem('pendingRole') as Role | null;
-      if (pending) role = pending;
-    }
+    const pending = localStorage.getItem('pendingRole') as Role | null;
+    if (!role && pending) role = pending;
     if (role) localStorage.setItem('role', role);
-
-    if (localStorage.getItem('pendingRole')) localStorage.removeItem('pendingRole');
-  }
-
-  // ✅ Lưu token thủ công (dùng khi BE trả token ngay sau register)
-  setToken(
-    token: string,
-    extras?: { role?: string; userId?: number | string; username?: string }
-  ) {
-    if (!token) return;
-    localStorage.setItem('jwt', String(token));
-
-    // role: ưu tiên extras → fallback decode token
-    let role = this.normalizeRole(extras?.role);
-    if (!role) role = this.extractRoleFromToken(token);
-    if (role) localStorage.setItem('role', role);
-
-    // userId: ưu tiên extras → fallback decode token
-    const payload = this.decodeJwt(token);
-    const uid = extras?.userId ?? payload?.userId ?? payload?.sub;
-    if (uid != null) localStorage.setItem('userId', String(uid));
-
-    if (extras?.username) localStorage.setItem('username', String(extras.username));
+    if (pending) localStorage.removeItem('pendingRole');
   }
 
   // ===== GETTERS =====
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('jwt');
-  }
-  getToken(): string | null {
-    return localStorage.getItem('jwt');
-  }
-  getUserId(): number | null {
-    const v = localStorage.getItem('userId');
-    return v ? Number(v) : null;
-  }
-  getUserRole(): Role {
-    return (localStorage.getItem('role') as Role) ?? '';
-  }
-  setUserRole(r: Role) {
-    if (r) localStorage.setItem('role', r);
-  }
+  isLoggedIn(): boolean { return !!this.getToken(); }
+  getToken(): string | null { return localStorage.getItem('jwt') ?? localStorage.getItem('access_token'); }
+  getUserId(): number | null { const v = localStorage.getItem('userId'); return v ? Number(v) : null; }
+  getUserRole(): Role { return (localStorage.getItem('role') as Role) ?? ''; }
+  setUserRole(r: Role) { if (r) localStorage.setItem('role', r); }
+
+  // LẤY ROLE nếu LS chưa có
   ensureRoleFromTokenIfMissing(): Role {
     const cur = this.getUserRole();
     if (cur) return cur;
-    const t = this.getToken();
-    if (!t) return '';
+    const t = this.getToken(); if (!t) return '';
     const r = this.extractRoleFromToken(t);
     if (r) this.setUserRole(r);
     return r;
-    }
+  }
 
-  // ✅ Lấy userId từ localStorage; nếu thiếu thì decode từ token và lưu lại
+  // LẤY USERID nếu LS chưa có: ưu tiên token → fallback qua email
   ensureUserIdFromTokenIfMissing(): number | null {
     const cur = this.getUserId();
     if (cur != null) return cur;
 
     const t = this.getToken();
-    if (!t) return null;
-
-    const p = this.decodeJwt(t);
-    const uid = p?.userId ?? p?.sub ?? null;
-    if (uid != null) {
-      localStorage.setItem('userId', String(uid));
-      return Number(uid);
+    if (t) {
+      const p = this.decodeJwt(t);
+      const uid = p?.userId ?? p?.uid ?? p?.sub ?? null;
+      if (uid != null) {
+        localStorage.setItem('userId', String(uid));
+        return Number(uid);
+      }
     }
     return null;
   }
 
   logout(): void {
-    ['jwt', 'role', 'userId', 'username', 'pendingRole', 'pendingEmail'].forEach((k) =>
-      localStorage.removeItem(k)
-    );
+    ['jwt','access_token','role','userId','username','pendingRole','pendingEmail','login_email']
+      .forEach(k => localStorage.removeItem(k));
   }
 
   // ===== USERS API =====
-  getUserById(userId: number) {
-    return this.http.get(`${this.apiUrl}/${userId}`);
-  }
-  updateProfile(userId: number, data: any) {
-    return this.http.put(`${this.apiUrl}/update/${userId}`, data);
-  }
+  getUserById(userId: number) { return this.http.get(`${this.apiUrl}/getUser/${userId}`); }
+  getUserIdByEmail(email: string) { return this.http.get(`${this.apiUrl}/email/${encodeURIComponent(email)}`); } // điều chỉnh theo BE
+  updateProfile(userId: number, data: any) { return this.http.put(`${this.apiUrl}/update/${userId}`, data); }
 }
