@@ -66,4 +66,15 @@ class UserService:
         except Exception as e:
             return {}
         
+    def delete_user(self, user_id: int) -> bool:
+        try:
+            response = self._make_request("DELETE", f"/api/users/{user_id}")
+            
+            if response.status_code == 200:
+                return True
+            else:
+                return False        
+        except Exception as e:
+            return False
+        
 user_service = UserService()

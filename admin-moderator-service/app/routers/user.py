@@ -25,5 +25,12 @@ def update_user(user_id: int, update_data: Dict[str, Any]):
         raise HTTPException(status_code=404, detail="User not found or update failed")
     return result
 
+@router.delete("/{user_id}")
+def delete_user(user_id: int):
+    success = user_service.delete_user(user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found or deletion failed")
+    return {"detail": "User deleted successfully"}
+
 
 

@@ -39,16 +39,5 @@ class StudentService:
                 return None        
         except Exception as e:
             return None
-    
-    def delete_student(self, user_id: int) -> bool:
-        try:
-            response = self._make_request("DELETE", f"/api/students/user/{user_id}")
-            
-            if response.status_code in [200, 204]:
-                return True
-            else:
-                return False        
-        except Exception as e:
-            return False
         
 student_service = StudentService()
