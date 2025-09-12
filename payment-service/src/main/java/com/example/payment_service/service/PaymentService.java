@@ -6,6 +6,8 @@ import com.example.payment_service.event.PaymentSuccessEvent;
 import com.example.payment_service.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -60,5 +63,13 @@ public class PaymentService {
         log.info("đã gửi sang bên phía booking-serivce=====>>>>",event);
 
         return true;
+    }
+
+    public Page<Payment> getAllPayments(Pageable pageable) {
+        return paymentRepository.findAll(pageable);
+    }
+
+    public Optional<Payment> getPaymentById(Long id) {
+        return paymentRepository.findById(id);
     }
 }
