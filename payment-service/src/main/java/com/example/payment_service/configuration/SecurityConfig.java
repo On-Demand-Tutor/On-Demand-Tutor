@@ -23,7 +23,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/payments/vnpay/callback","/api/payments/vnpay/create","/api/payments/vnpay/callback/**").permitAll()
+                        .requestMatchers("/api/payments/vnpay/callback","/api/payments/vnpay/create","/api/payments/vnpay/callback/**","/api/payments/getAllPayment","/api/payments/{id}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
