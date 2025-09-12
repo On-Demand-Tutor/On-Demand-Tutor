@@ -15,4 +15,5 @@ public class TutorUpdatedEvent {
     private String skills;
     private Double price;
     private String teachingGrades;
+    private String description;
 }

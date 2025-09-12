@@ -34,6 +34,8 @@ public class TutorConsumer {
                 .qualifications(event.getQualifications())
                 .skills(event.getSkills())
                 .teachingGrades(event.getTeachingGrades())
+                .price(event.getPrice())
+                .description(event.getDescription())
                 .build();
         tutorRepository.save(tutor);
     }
@@ -56,6 +58,9 @@ public class TutorConsumer {
         }
         if (event.getTeachingGrades() != null) {
             tutor.setTeachingGrades(event.getTeachingGrades());
+        }
+        if (event.getDescription() != null) {
+            tutor.setDescription(event.getDescription());
         }
         tutorRepository.save(tutor);
     }

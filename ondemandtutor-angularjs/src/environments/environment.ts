@@ -5,6 +5,6 @@ export const environment = {
     tutorService: 'http://localhost:8081/api/tutors',
     userService: 'http://localhost:8082/api/users',
     feedbackService: 'http://localhost:8083/api/feedbacks',
-    adminService: 'http://localhost:8001/api/admin'
+    adminService: 'http://localhost:8001/api/admin',
   }
 };

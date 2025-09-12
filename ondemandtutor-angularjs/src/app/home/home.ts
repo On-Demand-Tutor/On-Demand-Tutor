@@ -21,6 +21,12 @@ export class HomeComponent implements OnInit {
   // nếu template có hiển thị tên
   username = '';
 
+   tutorId: number | null = null; 
+
+   get tutorProfileLink(): any[] | null {
+    return this.tutorId ? ['/tutor', this.tutorId] : null;
+    }
+
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit(): void {
@@ -32,6 +38,10 @@ export class HomeComponent implements OnInit {
 
     // lấy username nếu có
     this.username = localStorage.getItem('username') || '';
+    
+    if (this.userRole === 'tutor') {
+      this.tutorId = this.auth.getUserId();
+    }
   }
 
   // mở/đóng menu avatar
