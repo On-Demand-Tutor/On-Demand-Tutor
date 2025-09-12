@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/api/users/getAllUser",
                                 "/api/users/getUser/{id}"
                         ).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole(UserRole.ADMIN.name())
                         // Cho DELETE có thể yêu cầu auth hoặc permitAll tuỳ nhu cầu
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").permitAll()
                         .anyRequest().authenticated()
