@@ -79,7 +79,8 @@ public class UserService {
                    request.getQualifications(),
                     request.getSkills(),
                     request.getTeachingGrades(),
-                    request.getPrice()
+                    request.getPrice(),
+                    request.getDescription()
             );
             kafkaTemplate.send("tutor-created", event);
             System.out.println("Đã gửi Kafka event tới Tutor:========================================================= " + event);
@@ -119,7 +120,8 @@ public class UserService {
                     request.getQualifications(),
                     request.getSkills(),
                     request.getTeachingGrades(),
-                    request.getPrice()
+                    request.getPrice(),
+                    request.getDescription()
             );
             kafkaTemplate.send("tutor-updated", event);
             System.out.println("Đã gửi Kafka event update Tutor========================================================= " + event);
@@ -176,7 +178,7 @@ public class UserService {
 
         if (user.getRole() == UserRole.TUTOR) {
             TutorResponse tutor = restTemplate.getForObject(
-                    "http://tutor-service:8081/api/tutors/user/" + user.getId(),
+                    "http://tutor-service:8080/api/tutors/user/" + user.getId(),
                     TutorResponse.class
             );
             if (tutor != null) {
@@ -184,15 +186,11 @@ public class UserService {
                         .id(user.getId())
                         .email(user.getEmail())
                         .username(user.getUsername())
-                        .skills(tutor.getSkills())
                         .qualifications(tutor.getQualifications())
+                        .skills(tutor.getSkills())
                         .teachingGrades(tutor.getTeachingGrades())
-                        .rating(tutor.getRating())
-                        .isVerified(tutor.isVerified())
                         .price(tutor.getPrice())
-                        .availableTime(tutor.getAvailableTime())
                         .description(tutor.getDescription())
-                        .promoFile(tutor.getPromoFile())
                         .build();
             }
         }

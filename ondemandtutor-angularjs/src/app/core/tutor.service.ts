@@ -11,6 +11,7 @@ export interface Tutor {
   subjects: string[];
   verified?: boolean;
   avatar?: string;
+  price?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -65,4 +66,13 @@ export class TutorService {
       tap(() => this.removeLocal(id))
     );
   }
+  getTutors(): Observable<Tutor[]> {
+    return this.http.get<Tutor[]>(`${this.api}/tutors`);
+  }
+
+  // Lấy tutor theo ID
+  getTutorById(id: number): Observable<Tutor> {
+    return this.http.get<Tutor>(`${this.api}/tutors/${id}`);
+  }
+
 }
