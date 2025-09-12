@@ -23,7 +23,6 @@ export class LoginComponent implements OnInit {
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    // nếu vừa chuyển từ trang đăng ký:
     const state = history.state as any;
     if (state?.justRegistered) {
       this.successMessage = 'Tạo tài khoản thành công! Vui lòng đăng nhập.';
@@ -41,7 +40,6 @@ export class LoginComponent implements OnInit {
     e.preventDefault();
     this.clearMessages();
 
-    // ===== Basic validation =====
     const email = (this.email || '').trim();
     const password = (this.password || '').trim();
 
@@ -50,34 +48,30 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // ===== Email format validation =====
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       this.errorMessage = 'Email không hợp lệ';
       return;
     }
 
-    // ===== Call API thật =====
     this.isLoading = true;
 
-   this.auth.login(email, password)
-  .pipe(finalize(() => { 
-    this.isLoading = false; 
-    this.password = ''; // ✅ không giữ mật khẩu trong state sau request
-  }))
-  .subscribe({
-    next: () => {
-      this.auth.ensureRoleFromTokenIfMissing();
-      this.successMessage = 'Đăng nhập thành công! Đang chuyển hướng...';
-      setTimeout(() => this.router.navigateByUrl('/home', { replaceUrl: true }), 800); // ✅ tránh back về /login
-    },
-    error: (err) => {
-      // ✅ đừng show err.error.message thô
-      if (err?.status === 0)       this.errorMessage = 'Không kết nối được máy chủ. Vui lòng thử lại.';
-      else if (err?.status === 401) this.errorMessage = 'Email hoặc mật khẩu không đúng.';
-      else if (err?.status === 400) this.errorMessage = 'Thông tin đăng nhập chưa hợp lệ.';
-      else                          this.errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
-    }
-  });
+    this.auth.login(email, password)
+      .pipe(finalize(() => { 
+        this.isLoading = false; 
+        this.password = ''; 
+      }))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Đăng nhập thành công! Đang chuyển hướng...';
+          setTimeout(() => this.router.navigateByUrl('/home', { replaceUrl: true }), 800);
+        },
+        error: (err) => {
+          if (err?.status === 0)       this.errorMessage = 'Không kết nối được máy chủ.';
+          else if (err?.status === 401) this.errorMessage = 'Email hoặc mật khẩu không đúng.';
+          else if (err?.status === 400) this.errorMessage = 'Thông tin đăng nhập chưa hợp lệ.';
+          else                          this.errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
+        }
+      });
   }
 }

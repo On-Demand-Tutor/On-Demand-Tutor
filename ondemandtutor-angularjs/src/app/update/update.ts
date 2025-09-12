@@ -1,184 +1,115 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService, Role } from '../auth';
-import { TutorService, Tutor } from '../core/tutor.service';
 
 @Component({
   selector: 'app-update',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './update.html',
   styleUrls: ['./update.css']
 })
 export class UpdateComponent implements OnInit {
-  // common fields
-  username = '';
-  password = '';
-
-  // role-specific
-  grade: number | null = null;      // student
-  qualifications = '';              // tutor
-  skills = '';                      // tutor
-  teachingGrades = '';              // tutor
-  price: number | null = null;
-
+  userId: number | null = null;
   userRole: Role = '';
-  isLoggedIn = false;
 
-  isFetching = false;
-  isLoading  = false;
+  username = ''; password = '';
+  grade: number | null = null;
+  qualifications = ''; skills = ''; teachingGrades = '';
+  price: number | null = null; description = ''; avatar = '';
 
-  successMessage = '';
-  errorMessage = '';
-  isAvatarMenuOpen = false;
+  isLoading = false; successMessage = ''; errorMessage = '';
+  showAvatarMenu = false; toggleAvatarMenu() { this.showAvatarMenu = !this.showAvatarMenu; }
 
-  constructor(
-    public authService: AuthService,
-    private router: Router,
-    private tutorService: TutorService
-  ) {}
+  constructor(private auth: AuthService) {}
 
-  ngOnInit() {
-    this.isLoggedIn = this.authService.isLoggedIn();
-    if (!this.isLoggedIn) return;
+  ngOnInit(): void {
+    this.userRole = this.auth.ensureRoleFromTokenIfMissing();
 
-    this.userRole = this.authService.getUserRole() || this.authService.ensureRoleFromTokenIfMissing();
-    this.authService.ensureUserIdFromTokenIfMissing();
+    // 1) thử lấy userId từ token/localStorage
+    const tryId = this.auth.ensureUserIdFromTokenIfMissing();
+    if (tryId) { this.userId = tryId; this.loadUser(tryId); return; }
 
-    const uid = this.authService.getUserId();
-    if (uid != null) this.loadProfile(uid);
-  }
+    // 2) fallback theo email
+    const email = localStorage.getItem('login_email');
+    if (!email) { this.errorMessage = 'Thiếu userId và email. Vui lòng đăng nhập lại.'; return; }
 
-  loadProfile(userId: number) {
-    this.isFetching = true;
-    this.authService.getUserById(userId)
-      .pipe(finalize(() => (this.isFetching = false)))
+    this.isLoading = true;
+    this.auth.getUserIdByEmail(email)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (u: any) => {
-          if (!this.userRole && u?.role) {
-            this.userRole = String(u.role).toLowerCase() as Role;
-            this.authService.setUserRole(this.userRole);
-          }
-          this.username = u?.username ?? this.username;
-
-          if (this.userRole === 'student') {
-            const g = u?.grade;
-            this.grade = (g === null || g === undefined) ? this.grade : Number(g);
-          } else if (this.userRole === 'tutor') {
-            this.qualifications = u?.qualifications ?? this.qualifications;
-            this.skills = u?.skills ?? this.skills;
-            this.teachingGrades = u?.teachingGrades ?? this.teachingGrades;
-            this.price = u?.price != null ? Number(u.price) : this.price;
-          }
+        next: (res: any) => {
+          const u = res?.result ?? res?.data ?? res;
+          const id = Number(u?.id ?? u?.userId ?? 0);
+          if (!id) { this.errorMessage = 'Không tìm thấy user theo email.'; return; }
+          localStorage.setItem('userId', String(id));
+          this.userId = id;
+          this.loadUser(id);
         },
-        error: () => {}
+        error: () => this.errorMessage = 'Không lấy được userId theo email.'
       });
   }
 
-  private buildPayload(): any {
-    const payload: any = {};
-    const username = this.username?.trim();
-    const password = this.password?.trim();
-    if (username) payload.username = username;
-    if (password) payload.password = password;
-
-    if (this.userRole === 'student') {
-      if (this.grade !== null && !Number.isNaN(Number(this.grade))) {
-        payload.grade = Number(this.grade);
-      }
-    } else if (this.userRole === 'tutor') {
-      if (this.qualifications.trim()) payload.qualifications = this.qualifications.trim();
-      if (this.skills.trim())          payload.skills = this.skills.trim();
-      if (this.teachingGrades.trim())  payload.teachingGrades = this.teachingGrades.trim();
-      if (this.price !== null && !Number.isNaN(this.price)) {
-        payload.price = Number(this.price);
-      }
-    }
-    return payload;
-  }
-
-  updateProfile() {
-    this.successMessage = '';
-    this.errorMessage = '';
-
-    const userId = this.authService.ensureUserIdFromTokenIfMissing() ?? this.authService.getUserId();
-    if (userId == null) {
-      this.errorMessage = 'Thiếu userId, vui lòng đăng nhập lại.';
-      return;
-    }
-
-    if (this.userRole === 'student' && this.grade !== null) {
-      const g = Number(this.grade);
-      if (Number.isNaN(g) || g < 1 || g > 12) {
-        this.errorMessage = 'Grade phải là số từ 1 đến 12.';
-        return;
-      }
-    }
-
-    const payload = this.buildPayload();
-    if (Object.keys(payload).length === 0) {
-      this.errorMessage = 'Không có thay đổi để lưu.';
-      return;
-    }
-
+  private loadUser(id: number): void {
     this.isLoading = true;
-    this.authService.updateProfile(userId, payload)
+    this.auth.getUserById(id)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: () => {
-          this.successMessage = 'Cập nhật hồ sơ thành công!';
-          this.password = '';
-
-          // Đồng bộ sang danh sách tutor (nếu là tutor)
-          if (this.userRole === 'tutor') {
-            const t: Tutor = {
-              id: userId,
-              name: this.username || 'Tutor',
-              description: this.qualifications || this.skills || '',
-              rating: 5,
-              subjects: [
-                ...((this.skills || '').split(',').map(s => s.trim()).filter(Boolean)),
-                ...((this.teachingGrades || '').split(',').map(s => s.trim()).filter(Boolean))
-              ],
-              verified: true,
-              avatar: ''
-            };
-            this.tutorService.upsertLocal(t);
-          }
-
-          // RẤT QUAN TRỌNG: refresh từ BE để mọi account/thiết bị thấy
-          this.tutorService.refresh();
-
-          // điều hướng về trang tìm kiếm
-          this.router.navigateByUrl('/search_tutor');
+        next: (res: any) => {
+          const u = res?.result ?? res?.data ?? res;
+          this.username       = u?.username ?? u?.name ?? '';
+          this.grade          = u?.grade ?? null;
+          this.qualifications = u?.qualifications ?? '';
+          this.skills         = u?.skills ?? '';
+          this.teachingGrades = u?.teachingGrades ?? '';
+          this.price          = u?.price ?? null;
+          this.description    = u?.description ?? '';
+          this.avatar         = u?.avatar ?? '';
         },
-        error: (err: any) => {
-          const raw =
-            err?.error?.message ||
-            (typeof err?.error === 'string' ? err.error : '') ||
-            err?.statusText ||
-            '';
-
-          if (err?.status === 0)        this.errorMessage = 'Không kết nối được máy chủ.';
-          else if (err?.status === 400) this.errorMessage = raw || 'Dữ liệu không hợp lệ.';
-          else if (err?.status === 401) this.errorMessage = raw || 'Bạn chưa đăng nhập.';
-          else if (err?.status === 404) this.errorMessage = raw || 'Không tìm thấy tài nguyên.';
-          else if (err?.status === 500) this.errorMessage = raw || 'Lỗi máy chủ khi cập nhật.';
-          else this.errorMessage = raw || 'Cập nhật thất bại.';
+        error: (err) => {
+          console.error('getUser error', err);
+          this.errorMessage = err?.status === 401
+            ? 'Bạn chưa đăng nhập hoặc token đã hết hạn.'
+            : 'Không tải được thông tin người dùng.';
         }
       });
   }
 
-  toggleAvatarMenu() { this.isAvatarMenuOpen = !this.isAvatarMenuOpen; }
-  logout() { this.authService.logout(); this.router.navigate(['/login']); }
+  updateProfile(): void {
+    if (!this.userId) { this.errorMessage = 'Không tìm thấy userId.'; return; }
+    this.successMessage = ''; this.errorMessage = ''; this.isLoading = true;
 
-@HostListener('document:click', ['$event'])
-onDocClick(ev: MouseEvent) {
-  if (this.isAvatarMenuOpen) {
-    this.isAvatarMenuOpen = false;
+    const body: any = { username: this.username?.trim() };
+    if (this.password?.trim()) body.password = this.password.trim();
+    if (this.userRole === 'student') body.grade = this.grade ?? null;
+    if (this.userRole === 'tutor') Object.assign(body, {
+      qualifications: this.qualifications?.trim(),
+      skills: this.skills?.trim(),
+      teachingGrades: this.teachingGrades?.trim(),
+      price: this.price ?? 0,
+      description: this.description?.trim(),
+      avatar: this.avatar?.trim()
+    });
+
+    this.auth.updateProfile(this.userId, body)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: () => { this.successMessage = 'Cập nhật hồ sơ thành công!'; this.password = ''; },
+        error: (err) => {
+          console.error('update error', err);
+          this.errorMessage =
+            err?.status === 401 ? 'Bạn chưa đăng nhập hoặc token đã hết hạn.'
+          : err?.status === 400 ? 'Dữ liệu không hợp lệ.'
+          : 'Cập nhật thất bại. Vui lòng thử lại.';
+        }
+      });
   }
-}
+
+  logout(): void {
+    this.auth.logout();
+    window.location.href = '/login';
+  }
 }
