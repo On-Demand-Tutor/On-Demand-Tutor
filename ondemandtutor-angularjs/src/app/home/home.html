@@ -28,6 +28,9 @@
 
         <ul class="dropdown" *ngIf="isAvatarMenuOpen">
           <li><a routerLink="/update">Update Profile</a></li>
+          <li *ngIf="userRole === 'tutor' && tutorProfileLink">
+            <a [routerLink]="tutorProfileLink" class="btn-profile">Xem hồ sơ</a>
+          </li>
           <li><a (click)="logout()">Logout</a></li>
         </ul>
       </div>

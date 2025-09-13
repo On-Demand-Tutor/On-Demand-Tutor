@@ -28,8 +28,6 @@ public class Payment {
 
     private String status;
 
-    private String transactionId;
-
     private String transactionNo;
 
     private LocalDateTime createdAt;

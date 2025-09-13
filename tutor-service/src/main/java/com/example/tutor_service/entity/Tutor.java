@@ -29,6 +29,9 @@ public class Tutor {
     @Column(nullable = false)
     private boolean isVerified = false;
 
+    private String description;
+
     private Double price;
+    
 }
 

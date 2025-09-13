@@ -1,5 +1,6 @@
 package com.example.student_service.controller;
 
+import com.example.student_service.dto.request.RatingRequest;
 import com.example.student_service.dto.request.SearchTutorRequest;
 import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
@@ -94,6 +95,19 @@ public class StudentController {
     @GetMapping("/verify/{userId}")
     public ResponseEntity<Boolean> verifyStudent(@PathVariable Long userId) {
         return ResponseEntity.ok(studentService.verifyStudent(userId));
+    }
+
+    @PostMapping("/rating/{tutorUserId}")
+    public ResponseEntity<String> rateTutor(
+            @PathVariable Long tutorUserId,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody RatingRequest request) {
+
+        Long userId = jwt.getClaim("userId");
+
+        studentService.rateTutor(tutorUserId, userId, request.getRating(), request.getComment());
+
+        return ResponseEntity.ok("Rating submitted successfully!");
     }
 
 

@@ -36,5 +36,6 @@ public class UserCreateRequest {
 
     private Integer grade;    
     private Double price;
+    private String description;
 
 }

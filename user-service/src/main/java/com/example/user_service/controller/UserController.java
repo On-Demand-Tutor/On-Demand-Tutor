@@ -72,4 +72,10 @@ public class UserController {
         return ResponseEntity.ok(email);
     }
 
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> delete(@PathVariable Long userId) {
+        log.info("HIT DELETE /api/users/{}", userId); // giúp bạn thấy request đã vào controller
+        userService.deleteUser(userId);               // đã xử lý xóa + publish event (nếu bạn cấu hình)
+        return ResponseEntity.noContent().build();    // 204
+    }
 }

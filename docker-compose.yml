@@ -11,6 +11,7 @@ services:
       - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - my-network
 
@@ -165,25 +166,25 @@ services:
       - my-network
     restart: unless-stopped
 
-  book-service:
-    build:
-      context: ./book-service
-      dockerfile: Dockerfile
-    container_name: book-service
-    ports:
-      - "8089:8080"
-    depends_on:
-      - mysql
-      - kafka
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_book_service?createDatabaseIfNotExist=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-    networks:
-      - my-network
-    restart: unless-stopped
+  # book-service:
+  #   build:
+  #     context: ./book-service
+  #     dockerfile: Dockerfile
+  #   container_name: book-service
+  #   ports:
+  #     - "8089:8080"
+  #   depends_on:
+  #     - mysql
+  #     - kafka
+  #   environment:
+  #     - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_book_service?createDatabaseIfNotExist=true
+  #     - SPRING_DATASOURCE_USERNAME=root
+  #     - SPRING_DATASOURCE_PASSWORD=123456
+  #     - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+  #     - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+  #   networks:
+  #     - my-network
+  #   restart: unless-stopped
 
   notifications-service:
     build:
