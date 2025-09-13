@@ -1,0 +1,97 @@
+<header>
+  <div class="container">
+    <h1 class="logo">On-Demand-Tutor</h1>
+    <nav>
+      <ul>
+        <li><a href="/home">Trang chủ</a></li>
+        <li><a href="/about">Về chúng tôi</a></li>
+        <li><a href="/contact">Liên hệ</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="search-page">
+  <section class="search-container">
+    <h2>Khám phá On-Demand-Tutor</h2>
+    <p>Tìm kiếm người đồng hành hoàn hảo cho hành trình học tập của bạn.</p>
+
+    <label for="search-input">Từ khóa</label>
+    <div class="search-bar">
+      <input id="search-input"
+             type="text"
+             placeholder="Tên gia sư, môn học..."
+             [(ngModel)]="keyword"
+             name="q"
+             (keyup.enter)="search()">
+      <button class="btn-search" type="button" (click)="search()">Tìm kiếm</button>
+    </div>
+  </section>
+
+  <!-- chỉ hiển thị sau khi bấm Tìm kiếm -->
+  <section class="results" *ngIf="hasSearched">
+    Tìm thấy <strong>{{ totalTutors }}</strong> gia sư phù hợp
+
+    <div class="tutors">
+      <article class="tutor-card" *ngFor="let t of pagedResults">
+        <div class="tutor-head">
+          <img [src]="t.avatar || 'https://via.placeholder.com/80'" alt="Gia sư" class="avatar">
+          <div class="title-wrap">
+            <h3 class="name">
+              {{ t.name }}
+              <span *ngIf="t.verified" class="verified" title="Đã xác minh">✔</span>
+            </h3>
+          </div>
+        </div>
+
+        <div class="tutor-body">
+          <p class="desc">{{ t.description }}</p>
+        </div>
+
+        <div class="tutor-tags">
+          <span *ngFor="let s of t.subjects">{{ s }}</span>
+        </div>
+      </article>
+    </div>
+
+    <div *ngIf="filteredResults.length === 0" style="text-align:center;color:#6b7280;margin:16px 0;">
+      Không tìm thấy gia sư phù hợp.
+    </div>
+
+    <nav class="pagination" *ngIf="totalPages > 1">
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">‹</button>
+      <button class="page-btn"
+              *ngFor="let p of pages"
+              [class.active]="p === currentPage"
+              (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">›</button>
+    </nav>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-column">
+      <h1 class="logo">On-Demand-Tutor</h1>
+      <p>Nền tảng kết nối gia sư và học viên hàng đầu Việt Nam.<br>
+        Chúng tôi cam kết mang đến trải nghiệm học tập tốt nhất cho bạn.</p>
+    </div>
+    <div class="footer-column">
+      <h4>Giới thiệu</h4>
+      <a routerLink="/about">Giới thiệu về chúng tôi</a>
+      <a routerLink="/contact">Liên hệ với chúng tôi</a>
+    </div>
+    <div class="footer-column">
+      <h4>Chính sách & Điều khoản</h4>
+      <a routerLink="/privacy">Chính sách về quyền riêng tư</a>
+      <a routerLink="/terms">Điều khoản</a>
+    </div>
+  </div>
+  <hr>
+  <div class="footer-bottom">
+    <div class="logo">&copy; 2025 On-Demand-Tutor, Inc.</div>
+    <div class="language">🌐 Tiếng Việt</div>
+  </div>
+</footer>
