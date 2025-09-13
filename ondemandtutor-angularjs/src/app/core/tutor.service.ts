@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Tutor {
   id: number;
+  userId: number; // liên kết với User
   name: string;
   description: string;
   rating: number;
@@ -12,12 +13,16 @@ export interface Tutor {
   verified?: boolean;
   avatar?: string;
   price?: number;
+  qualifications?: string;
+  skills?: string;
+  teachingGrades?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class TutorService {
   private http = inject(HttpClient);
-  private api = environment.apiUrls?.tutorService || '/api/tutors';
+  /** Base URL = http://localhost:8081/api/tutors */
+  private api = environment.apiUrls.tutorService;
 
   /** Nguồn dữ liệu trung tâm */
   private readonly _tutors$ = new BehaviorSubject<Tutor[]>([]);
@@ -56,23 +61,30 @@ export class TutorService {
       tap(t => this.upsertLocal(t))
     );
   }
+
   update(id: number, payload: Partial<Tutor>) {
     return this.http.put<Tutor>(`${this.api}/${id}`, payload).pipe(
       tap(t => this.upsertLocal(t))
     );
   }
+
   delete(id: number) {
     return this.http.delete<void>(`${this.api}/${id}`).pipe(
       tap(() => this.removeLocal(id))
     );
   }
+
+  /** Lấy toàn bộ tutors */
   getTutors(): Observable<Tutor[]> {
-    return this.http.get<Tutor[]>(`${this.api}/tutors`);
+    return this.http.get<Tutor[]>(this.api);
   }
 
-  // Lấy tutor theo ID
+  /** Lấy tutor theo ID */
   getTutorById(id: number): Observable<Tutor> {
-    return this.http.get<Tutor>(`${this.api}/tutors/${id}`);
+    return this.http.get<Tutor>(`${this.api}/user/${id}`);
+  }
+  getTutorByUserId(userId: number) {
+    return this.http.get<Tutor>(`${this.api}/user/${userId}`);
   }
 
 }

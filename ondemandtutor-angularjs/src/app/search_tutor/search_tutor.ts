@@ -7,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 
 type TutorCard = {
   id: number;
+  userId: number; // liên kết với User
   name: string;
   rating: number;
   description: string;
@@ -106,7 +107,8 @@ export class SearchTutorComponent implements OnInit {
             .filter(Boolean);
 
           return {
-            id: Number(u?.userId ?? u?.id ?? 0),
+            id: Number(u?.id ?? 0),             // tutorId nếu backend có
+            userId: Number(u?.userId ?? 0), 
             name: String(u?.username ?? u?.name ?? ''),
             rating: Number(u?.rating ?? 5),
             description: this.buildDescription(u),

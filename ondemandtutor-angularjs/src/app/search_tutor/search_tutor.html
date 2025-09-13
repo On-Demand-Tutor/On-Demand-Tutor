@@ -33,16 +33,16 @@
     Tìm thấy <strong>{{ totalTutors }}</strong> gia sư phù hợp
 
     <div class="tutors">
-      <article class="tutor-card" *ngFor="let t of pagedResults">
-        <div class="tutor-head">
+      <article class="tutor-card" *ngFor="let t of pagedResults" [routerLink]="['/tutor', t.userId]">
+        <div  class="tutor-head">
           <img [src]="t.avatar || 'https://via.placeholder.com/80'" alt="Gia sư" class="avatar">
           <div class="title-wrap">
             <h3 class="name">
               {{ t.name }}
-              <span *ngIf="t.verified" class="verified" title="Đã xác minh">✔</span>
+            <span *ngIf="t.verified" class="verified" title="Đã xác minh">✔</span>
             </h3>
-          </div>
-        </div>
+  </div>
+</div>
 
         <div class="tutor-body">
           <p class="desc">{{ t.description }}</p>
