@@ -23,6 +23,8 @@ export class ProfileComponent implements OnInit {
   price: number | null = null;
   description = '';
   avatar = '';
+  promoFiles: string[] = [];
+
 
   // trạng thái UI
   isLoading = false;
@@ -43,24 +45,31 @@ export class ProfileComponent implements OnInit {
   }
 
   private loadProfile(id: number): void {
-    this.isLoading = true;
-    this.auth.getUserById(id)
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: (res: any) => {
-          const u = res?.result ?? res?.data ?? res;
-          this.username       = u?.username ?? '';
-          this.grade          = u?.grade ?? null;
-          this.qualifications = u?.qualifications ?? '';
-          this.skills         = u?.skills ?? '';
-          this.teachingGrades = u?.teachingGrades ?? '';
-          this.price          = u?.price ?? null;
-          this.description    = u?.description ?? '';
-          this.avatar         = u?.avatar ?? '';
-        },
-        error: () => this.errorMessage = 'Không tải được thông tin người dùng.'
-      });
-  }
+  this.isLoading = true;
+  this.auth.getUserById(id)
+    .pipe(finalize(() => (this.isLoading = false)))
+    .subscribe({
+      next: (res: any) => {
+        const u = res?.result ?? res?.data ?? res;
+        this.username       = u?.username ?? '';
+        this.grade          = u?.grade ?? null;
+        this.qualifications = u?.qualifications ?? '';
+        this.skills         = u?.skills ?? '';
+        this.teachingGrades = u?.teachingGrades ?? '';
+        this.price          = u?.price ?? null;
+        this.description    = u?.description ?? '';
+        this.avatar         = u?.avatar ?? '';
+      //   // 👇 xử lý promoFiles thành mảng string
+         if (Array.isArray(u?.promoFiles)) {
+           this.promoFiles = u.promoFiles;
+         } else {
+           const stored = localStorage.getItem(`promoFiles_user_${id}`);
+           this.promoFiles = stored ? JSON.parse(stored) : [];
+         }
+      },
+      error: () => this.errorMessage = 'Không tải được thông tin người dùng.'
+    });
+}
 
   goUpdateProfile(): void {
     this.router.navigate(['/update']);

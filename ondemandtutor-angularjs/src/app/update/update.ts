@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService, Role } from '../auth';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-update',
@@ -20,11 +21,14 @@ export class UpdateComponent implements OnInit {
   grade: number | null = null;
   qualifications = ''; skills = ''; teachingGrades = '';
   price: number | null = null; description = ''; avatar = '';
+  promoFiles: string [] = [];
 
   isLoading = false; successMessage = ''; errorMessage = '';
   showAvatarMenu = false; toggleAvatarMenu() { this.showAvatarMenu = !this.showAvatarMenu; }
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService
+    , private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
     this.userRole = this.auth.ensureRoleFromTokenIfMissing();
@@ -91,7 +95,8 @@ export class UpdateComponent implements OnInit {
       teachingGrades: this.teachingGrades?.trim(),
       price: this.price ?? 0,
       description: this.description?.trim(),
-      avatar: this.avatar?.trim()
+      avatar: this.avatar?.trim(),
+      promoFiles: this.promoFiles
     });
 
     this.auth.updateProfile(this.userId, body)
@@ -112,4 +117,26 @@ export class UpdateComponent implements OnInit {
     this.auth.logout();
     window.location.href = '/login';
   }
+  
+
+  onFileSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const files = Array.from(input.files);
+    this.promoFiles = [];
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        this.promoFiles.push(base64);
+
+        // lưu toàn bộ mảng vào localStorage
+        localStorage.setItem(`promoFiles_user_${this.userId}`, JSON.stringify(this.promoFiles));
+      };
+      reader.readAsDataURL(file); // 👈 convert sang base64
+    });
+  }
+}
+  
 }

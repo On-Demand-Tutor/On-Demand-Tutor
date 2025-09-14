@@ -5,7 +5,7 @@ import { RegisterComponent } from './register/register';
 import { UpdateComponent } from './update/update';
 import { SearchTutorComponent } from './search_tutor/search_tutor';
 import { SearchOnlyComponent } from './search_only/search_only';
-import { ChatComponent } from './chat/chat';
+//import { ChatComponent } from './chat/chat';
 import { ProfileComponent } from './profile/profile';
 import { TutorProfileComponent } from './tutor_profile/tutor_profile';
 import { BookingComponent } from './booking/booking';
@@ -18,9 +18,9 @@ export const routes: Routes = [
   { path: 'update', component: UpdateComponent },
   { path: 'search_tutor', component: SearchTutorComponent },
   { path: 'find', component: SearchOnlyComponent },
-  { path: 'chat', component: ChatComponent },
+  //{ path: 'chat', component: ChatComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'tutor/:id', component: TutorProfileComponent },
   { path: 'booking/:id', component: BookingComponent },
-  { path: 'chat/:id', component: ChatComponent },
+  //{ path: 'chat/:id', component: ChatComponent },
 ];
