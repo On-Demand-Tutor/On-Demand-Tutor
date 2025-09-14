@@ -38,6 +38,15 @@
         <div class="info-row"><b>Lớp dạy:</b> {{ teachingGrades }}</div>
         <div class="info-row"><b>Giá dạy:</b> {{ price | currency:'VND' }}/h</div>
         <div class="info-row"><b>Mô tả:</b> {{ description }}</div>
+        <div class="info-row" *ngIf="(promoFiles?.length ?? 0) > 0">
+          <b>File đính kèm:</b>
+          <ul>
+            <li *ngFor="let file of promoFiles; let i = index">
+              <a [href]="file" target="_blank">📂 File {{ i + 1 }}</a>
+            </li>
+          </ul>
+        </div>
+
       </ng-container>
     </div>
 
