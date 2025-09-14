@@ -23,5 +23,16 @@
     "target": "http://localhost:8001",
     "secure": false,
     "changeOrigin": true
+  }, 
+  "/api/bookings": {
+  "target": "http://localhost:8089",
+  "secure": false, 
+  "changeOrigin": true 
+  },
+  "api/chat":{
+   "target": "http://localhost:8088",
+   "secure": false,
+   "changeOrigin": true   
   }
 }
+

@@ -4,6 +4,8 @@
     "stompjs": "^2.3.3"
   },
   "devDependencies": {
+    "@jest/globals": "^30.1.2",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^24.3.3",
     "@types/sockjs-client": "^1.5.4",
     "@types/stompjs": "^2.3.9"
