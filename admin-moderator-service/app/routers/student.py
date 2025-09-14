@@ -4,7 +4,7 @@ from app.services.student_service import student_service
 from app.services.role_service import role_service
 
 router = APIRouter(
-    prefix="/students",
+    prefix="/admin/students",
     tags=["Student Management"]
 )
 

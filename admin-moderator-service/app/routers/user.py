@@ -4,7 +4,7 @@ from typing import List, Dict, Any
 from app.services.user_service import user_service
 
 router = APIRouter(
-    prefix="/users",
+    prefix="/admin/users",
     tags=["User Management"]
 )
 

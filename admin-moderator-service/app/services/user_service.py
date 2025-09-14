@@ -41,7 +41,7 @@ class UserService:
             if not users:
                 break
             all_users.extend(users)
-            if len(users) < 6:
+            if len(users) < len(all_users):
                 break
             page += 1
         role_counts = {
