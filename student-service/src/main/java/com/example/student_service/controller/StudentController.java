@@ -1,11 +1,20 @@
 package com.example.student_service.controller;
 
+import com.example.student_service.dto.request.RatingRequest;
+import com.example.student_service.dto.request.SearchTutorRequest;
+import com.example.student_service.dto.response.SearchTutorResponse;
 import com.example.student_service.entity.Student;
+import com.example.student_service.event.ChatMessageEvent;
 import com.example.student_service.repository.StudentRepository;
+import com.example.student_service.service.StudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import jakarta.annotation.security.PermitAll;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -14,6 +23,8 @@ import java.util.Map;
 public class StudentController {
 
     private final StudentRepository studentRepository;
+
+    private final StudentService studentService;
 
     @PostMapping
     public Student createStudent(@RequestBody Map<String, Object> studentData) {
@@ -38,4 +49,67 @@ public class StudentController {
         return studentRepository.save(student);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Student> getStudentByUserId(@PathVariable Long userId) {
+        Student student = studentService.getStudentByUserId(userId);
+        return ResponseEntity.ok(student);
+    }
+
+    @PostMapping("/search-tutor")
+    public SearchTutorResponse searchTutor(@RequestBody SearchTutorRequest request) throws Exception {
+        SearchTutorResponse response = studentService.searchTutorBySkill(request);
+
+        System.out.println("✅ Đã gửi request search tutor ở student controller với từ khóa: " + request.getKeyword());
+        System.out.println("👉 Kết quả search: " + response);
+
+        return response;
+    }
+
+    @PostMapping("/chat/send-message/{receiverUserId}")
+    public ResponseEntity<Void> sendMessage(
+            @PathVariable Long receiverUserId,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody ChatMessageEvent request
+    ) {
+        Long senderUserId = jwt.getClaim("userId");
+
+        Student student = studentService.getStudentByUserId(senderUserId);
+        Long studentId = student.getId();
+
+        Long tutorId = studentService.getTutorIdByUserId(receiverUserId);
+
+        ChatMessageEvent event = new ChatMessageEvent();
+        event.setSenderId(studentId);
+        event.setReceiverId(tutorId);
+        event.setContent(request.getContent());
+        event.setTimestamp(LocalDateTime.now());
+        event.setSenderRole("STUDENT");
+
+        // Gửi qua Kafka
+        studentService.sendChatMessage(event);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/verify/{userId}")
+    public ResponseEntity<Boolean> verifyStudent(@PathVariable Long userId) {
+        return ResponseEntity.ok(studentService.verifyStudent(userId));
+    }
+
+    @PostMapping("/rating/{tutorUserId}")
+    public ResponseEntity<String> rateTutor(
+            @PathVariable Long tutorUserId,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody RatingRequest request) {
+
+        Long userId = jwt.getClaim("userId");
+
+        studentService.rateTutor(tutorUserId, userId, request.getRating(), request.getComment());
+
+        return ResponseEntity.ok("Rating submitted successfully!");
+    }
+
+
 }
+

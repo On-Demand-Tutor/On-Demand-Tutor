@@ -4,7 +4,7 @@
     <nav>
       <ul>
         <li><a href="home">Trang chủ</a></li>
-        <li><a href="tutors">Tìm gia sư</a></li>
+        <li><a routerLink="/find">Tìm gia sư</a></li>
         <li><a href="about">Về chúng tôi</a></li>
         <li><a href="contact">Liên hệ</a></li>
       </ul>
@@ -47,7 +47,6 @@
       
       <button 
         type="submit" 
-        [disabled]="isLoading"
         [class.loading]="isLoading">
         <span *ngIf="!isLoading">Login</span>
         <span *ngIf="isLoading" class="loading-text">

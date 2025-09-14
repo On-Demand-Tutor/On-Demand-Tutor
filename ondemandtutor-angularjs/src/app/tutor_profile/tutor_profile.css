@@ -1,0 +1,111 @@
+/* Layout */
+.profile-page {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* Avatar */
+.avatar {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 0 auto 1rem auto;
+  object-fit: cover;
+  border: 3px solid #4a90e2;
+}
+
+/* Title */
+.card h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #333;
+}
+.card h2 span {
+  color: #4caf50;
+  margin-left: 6px;
+  font-size: 1.2rem;
+}
+
+/* Info rows */
+.info-row {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+  color: #444;
+}
+.info-row b {
+  color: #222;
+  margin-right: 6px;
+}
+
+/* Last info row */
+.info-row:last-child {
+  border-bottom: none;
+}
+
+/* Loading / error */
+p {
+  text-align: center;
+  color: #666;
+  margin-top: 2rem;
+  font-size: 1rem;
+}
+p.error {
+  color: #e74c3c;
+  font-weight: 500;
+}
+/* Action buttons */
+.actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.booking-btn {
+  background: #4a90e2;
+}
+.booking-btn:hover {
+  background: #357abd;
+  transform: translateY(-2px);
+}
+
+.chat-btn {
+  background: #28a745;
+}
+.chat-btn:hover {
+  background: #1e7e34;
+  transform: translateY(-2px);
+}
+

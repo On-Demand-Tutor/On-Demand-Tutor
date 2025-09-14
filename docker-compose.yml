@@ -11,6 +11,7 @@ services:
       - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - my-network
 
@@ -92,15 +93,139 @@ services:
       - "8000:8000"
     depends_on:
       - mysql
+    env_file:
+      - ./rating-feedback-service/.env
     environment:
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_NAME=rating_feedback_db
       - DB_USER=root
       - DB_PASSWORD=123456
+    volumes:
+      - ./rating-feedback-service:/app
     networks:
       - my-network
 
+  booking-service:
+    build:
+      context: ./booking-service
+      dockerfile: Dockerfile
+    container_name: booking-service
+    ports:
+      - "8002:8000"
+    networks:
+      - my-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - my-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"    # Cổng cho các dịch vụ bên trong Docker
+      - "29092:29092"  # Cổng cho kết nối từ host
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    networks:
+      - my-network
+
+  chat-service:
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    container_name: chat-service
+    ports:
+      - "8088:8080"
+    depends_on:
+      - mysql
+      - kafka
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_chat_service?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    networks:
+      - my-network
+    restart: unless-stopped
+
+  # book-service:
+  #   build:
+  #     context: ./book-service
+  #     dockerfile: Dockerfile
+  #   container_name: book-service
+  #   ports:
+  #     - "8089:8080"
+  #   depends_on:
+  #     - mysql
+  #     - kafka
+  #   environment:
+  #     - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_book_service?createDatabaseIfNotExist=true
+  #     - SPRING_DATASOURCE_USERNAME=root
+  #     - SPRING_DATASOURCE_PASSWORD=123456
+  #     - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+  #     - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+  #   networks:
+  #     - my-network
+  #   restart: unless-stopped
+
+  notifications-service:
+    build:
+      context: ./notifications-service
+      dockerfile: Dockerfile
+    container_name: notifications-service
+    ports:
+      - "8003:8080"
+    depends_on:
+      - kafka
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_notifications_service?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - my-network
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8090:8080"
+    depends_on:
+      - kafka
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/data_payment_service?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - VNPAY_PAYURL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      - VNPAY_RETURNURL=http://localhost:8090/api/payments/vnpay/callback
+      - VNPAY_TMNCODE=F7530RRT
+      - VNPAY_HASHSECRET=6B7I7K9E9V770GRRRTP0XHMUOTSXSFBT
+    networks:
+      - my-network
+    restart: unless-stopped
 
 volumes:
   mysql_data:

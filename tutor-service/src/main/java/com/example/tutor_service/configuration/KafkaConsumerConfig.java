@@ -1,0 +1,74 @@
+package com.example.tutor_service.configuration;
+
+
+import com.example.tutor_service.dto.request.SearchTutorRequest;
+import com.example.tutor_service.event.TutorCreatedEvent;
+import com.example.tutor_service.event.TutorUpdatedEvent;
+import com.example.tutor_service.event.TutorDeletedEvent;
+import com.example.tutor_service.event.TutorRatingEvent;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@EnableKafka
+@Configuration
+public class KafkaConsumerConfig {
+
+    private <T> ConsumerFactory<String, T> consumerFactory(Class<T> clazz) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "tutor-service-group");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                new JsonDeserializer<>(clazz, false)
+        );
+    }
+
+    private <T> ConcurrentKafkaListenerContainerFactory<String, T> kafkaListenerContainerFactory(Class<T> clazz) {
+        ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory(clazz));
+        return factory;
+    }
+
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, TutorCreatedEvent> kafkaListenerContainerFactoryForCreateTutor() {
+        return kafkaListenerContainerFactory(TutorCreatedEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, TutorUpdatedEvent> kafkaListenerContainerFactoryForUpdateTutor() {
+        return kafkaListenerContainerFactory(TutorUpdatedEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, TutorDeletedEvent> kafkaListenerContainerFactoryForDeleteTutor() {
+        return kafkaListenerContainerFactory(TutorDeletedEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, SearchTutorRequest> kafkaListenerContainerFactoryForSearchTutor() {
+        return kafkaListenerContainerFactory(SearchTutorRequest.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, TutorRatingEvent> kafkaListenerContainerFactoryForRateTutor() {
+        return kafkaListenerContainerFactory(TutorRatingEvent.class);
+    }
+
+}

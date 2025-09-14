@@ -1,0 +1,23 @@
+<main class="profile-page" *ngIf="tutor; else loadingTpl">
+  <div class="card">
+    <img [src]="tutor.promoFile || 'https://via.placeholder.com/120'" class="avatar">
+    <h2>{{ tutor.username }} <span *ngIf="tutor.verified">✔</span></h2>
+    <p class="email">📧 {{ tutor.email }}</p>
+
+    <div class="info-row"><b>Trình độ:</b> {{ tutor.qualifications }}</div>
+    <div class="info-row"><b>Kỹ năng:</b> {{ tutor.skills }}</div>
+    <div class="info-row"><b>Lớp dạy:</b> {{ tutor.teachingGrades }}</div>
+    <div class="info-row"><b>Giá dạy:</b> {{ tutor.price | currency:'VND' }}/h</div>
+    <div class="info-row"><b>Mô tả:</b> {{ tutor.description }}</div>
+
+    <!-- Action buttons -->
+    <div class="actions">
+      <a class="btn booking-btn" [routerLink]="['/booking', tutor.id]">📅 Đặt lịch học</a>
+      <a class="btn chat-btn" [routerLink]="['/chat', tutor.id]">💬 Chat ngay</a>
+    </div>
+  </div>
+</main>
+
+<ng-template #loadingTpl>
+  <p>⏳ Đang tải thông tin...</p>
+</ng-template>

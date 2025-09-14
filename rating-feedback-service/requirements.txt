@@ -1,5 +1,8 @@
 Django==5.2.5
-python-decouple
-djangorestframework
+requests>=2.32
+djangorestframework==3.14.0
 psycopg2-binary
 mysqlclient>=2.2.0
+gunicorn>=21.2
+PyMySQL
+cryptography

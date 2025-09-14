@@ -3,28 +3,34 @@
     <h1 class="logo">On-Demand-Tutor</h1>
     <nav>
       <ul>
-        <li><a href="home">Trang chủ </a></li>
-        <li><a href="tutors">Tìm gia sư </a></li>
-        <li><a href="about">Về chúng tôi </a></li>
+        <li><a href="home">Trang chủ</a></li>
+        <li><a routerLink="/find">Tìm gia sư</a></li>
+        <li><a href="about">Về chúng tôi</a></li>
         <li><a href="contact">Liên hệ</a></li>
       </ul>
     </nav>
 
     <div class="auth-buttons">
-      <a href="register" class="btn-register">Đăng ký</a>
-      <a href="login" class="btn-login">Đăng nhập</a>
+      <!-- Ẩn Đăng ký/Đăng nhập khi đã login -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a href="register" class="btn-register">Đăng ký</a>
+        <a href="login" class="btn-login">Đăng nhập</a>
+      </ng-container>
 
-      <!-- Avatar with dropdown -->
-      <div class="avatar-menu">
-        <img 
-          src="https://scontent.fsgn5-8.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s40x40&_nc_cat=1&_nc_sid=f5662c&_nc_ohc=tt8z1knDr6oQ7kNvwFjQZQP&_nc_oc=Adk5B7vST1kxheuDFvqXNcGF0AT-StYQlRAF_N5nEtnIsX2Q8quYivqMwcI7E2Rzf1s&_nc_zt=24&_nc_ht=scontent.fsgn5-8.fna&oh=00_AfUR6sbbnNPL0DBOS2edROl-_BZrbtGnFvF5NT6apAaLkQ&oe=68CB583A" 
-          class="auth-avatar" 
-          alt="Avatar"
-          (click)="toggleAvatarMenu()"/>
+      <!-- Avatar khi login -->
+      <div class="avatar-menu" *ngIf="isLoggedIn">
+      <img
+        src="https://scontent.fsgn5-8.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s40x40&_nc_cat=1&_nc_sid=f5662c&_nc_ohc=tt8z1knDr6oQ7kNvwFjQZQP&_nc_oc=Adk5B7vST1kxheuDFvqXNcGF0AT-StYQlRAF_N5nEtnIsX2Q8quYivqMwcI7E2Rzf1s&_nc_zt=24&_nc_ht=scontent.fsgn5-8.fna&oh=00_AfUR6sbbnNPL0DBOS2edROl-_BZrbtGnFvF5NT6apAaLkQ&oe=68CB583A"
+        class="auth-avatar"
+        alt="Avatar"
+        (click)="toggleAvatarMenu()"
+      />
 
         <ul class="dropdown" *ngIf="isAvatarMenuOpen">
-          <li><a routerLink="/profile">Profile</a></li>
-          <li><a routerLink="/settings">Settings</a></li>
+          <li><a routerLink="/update">Update Profile</a></li>
+          <li>
+            <a routerLink="/profile" class="btn-profile">Xem hồ sơ</a>
+          </li>
           <li><a (click)="logout()">Logout</a></li>
         </ul>
       </div>
@@ -36,7 +42,8 @@
   <div class="container">
     <h1>Học tập hiệu quả,<br> cùng gia sư chuyên nghiệp.</h1>
     <p>Tìm kiếm gia sư lý tưởng cho mọi môn học và mọi trình độ. Học trực tuyến dễ dàng mọi lúc, mọi nơi.</p>
-    <a href="tutors" class="btn-primary">Tìm gia sư ngay</a>
+    <!-- Ẩn nút Tìm gia sư ngay nếu là tutor -->
+    <a routerLink="/search_tutor" class="btn-primary" *ngIf="userRole !== 'tutor'">Tìm gia sư ngay</a>
   </div>
 </section>
 
@@ -59,7 +66,7 @@
   </div>
 </section>
 
-<section class="call-to-action">
+<section class="call-to-action" *ngIf="userRole !== 'tutor'">
   <h2>Gia sư sẵn sàng hỗ trợ bạn</h2>
   <a href="/explore" class="btn-secondary">Khám phá ngay</a>
 </section>

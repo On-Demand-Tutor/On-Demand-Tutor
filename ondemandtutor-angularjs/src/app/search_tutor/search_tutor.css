@@ -1,0 +1,267 @@
+:root {
+  --primary: #e91e63;       /* hồng nút */
+  --header-text: #000;
+  --footer-bg: #111827;
+  --footer-text: #f9fafb;
+  --panel-bg: #f5f6fa;      
+  --gray-bg: #f9fafb;
+  --card-border: #e5e7eb;
+  --radius: 12px;          
+  --text-dark: #111827;
+  --text-light: #6b7280;
+  --secondary: #f9fafb;     
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #111;
+  background: #fff;
+}
+
+header {
+  background: var(--primary);
+  color: var(--text-light);
+  padding: 10.5px 0;
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  margin: auto;
+}
+
+header .logo {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+header nav a {
+  color: var(--text-light);
+  text-decoration: none;
+}
+
+header nav a:hover {
+  text-decoration: underline;
+}
+
+.search-container {
+  width: 92%;
+  max-width: 1120px;
+  margin: 24px auto 18px;
+  background: #f5f6fa; 
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.search-container h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #111827;
+}
+.search-container p {
+  color: #6b7280; /* xám nhạt */
+  margin: 0 0 18px;
+}
+.search-container label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #111827;
+}
+.search-bar { display: flex; gap: 12px; }
+.search-bar input {
+  flex: 1;
+  height: 46px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 15px;
+  background: #fff;
+}
+.btn-search {
+  height: 46px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 10px;
+  background: #e91e63;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-search:hover { opacity: .92; }
+
+/* Card */
+.tutor-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  transition: box-shadow .18s ease, transform .05s ease;
+  padding: 14px;
+  min-height: 220px;   
+  height: auto;       
+}
+.tutor-card:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+}
+.tutor-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #111827;
+}
+.tutor-card p {
+  font-size: 14px;
+  color: #374151; /* xám đậm thay vì đen */
+  margin: 0 0 12px;
+  line-height: 1.45;
+  min-height: 50px;
+}
+.rating {
+  font-size: 14px;
+  color: #f59e0b; /* vàng */
+  margin-bottom: 10px;
+}
+
+/* Tag chip */
+.tags span {
+  display: inline-block;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  margin: 4px 6px 0 0;
+}
+
+/* Footer */
+footer {
+  background: #111827;
+  color: #ffffff;
+  padding: 40px 0 20px;
+  font-size: 16px;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-around;
+  width: 90%;
+  margin: auto;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  margin-bottom: 20px;
+}
+
+.footer-column h4 {
+  margin-bottom: 15px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.footer-column a {
+  text-decoration: none;
+  color: #d1d5db;
+  margin: 6px 0;
+  font-size: 15px;
+  transition: color 0.3s ease;
+}
+
+.footer-column a:hover {
+  color: var(--primary);
+}
+
+.footer-column p {
+  max-width: 300px;
+  line-height: 1.6;
+  margin: 6px 0;
+  color: #d1d5db;
+}
+
+hr {
+  border: none;
+  height: 1px;
+  background: #374151;
+  width: 90%;
+  margin: 0 auto 20px;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  margin: auto;
+  font-size: 15px;
+}
+
+.language {
+  color: #d1d5db;
+}
+
+.results {
+  width: 92%;
+  max-width: 1120px;
+  margin: 10px auto 36px;
+}
+.tutors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+.card-body { padding: 18px 16px 16px; }
+.tutor-card img {
+  width: 80px;
+  height: 80px;
+  border-radius: 0;
+  object-fit: cover;
+  display: block;
+}
+
+.tutor-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.tutor-tags span {
+  display: inline-block;
+  padding: 4px 8px;       /* thu nhỏ padding */
+  font-size: 12px;        /* chữ nhỏ hơn */
+  line-height: 1.2;
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;   /* bo tròn */
+}
+
+.tutors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.tutor-body {
+  flex: 1; 
+}
