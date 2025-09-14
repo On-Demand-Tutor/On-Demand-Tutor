@@ -1,37 +1,46 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat - On-Demand-Tutor</title>
-  <link rel="stylesheet" href="chat.css">
-</head>
-<body>
-  <div class="chat-container">
-    <!-- Sidebar -->
-    <aside class="chat-sidebar">
-      <div class="sidebar-header">
-        <h2>Chats</h2>
-        <input type="text" placeholder="Tìm kiếm...">
+<div class="chat-container">
+  <!-- Sidebar: danh sách tutor -->
+  <aside class="chat-sidebar">
+    <div class="sidebar-header">
+      <h2>Gia sư</h2>
+      <input type="text" placeholder="Tìm kiếm..."
+             [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()">
+    </div>
+
+    <div class="sidebar-list">
+      <div class="sidebar-item"
+           *ngFor="let t of filteredTutors"
+           [class.active]="t.id === currentChatId"
+           (click)="selectTutor(t)">
+        <div class="meta">
+          <div class="name">{{ t.name }}</div>
+        </div>
       </div>
-      <ul id="chat-list" class="chat-list"></ul>
-    </aside>
+    </div>
+  </aside>
 
-    <!-- Main chat -->
-    <section class="chat-main">
-      <div class="chat-header">
-        <h3 id="chat-title">Chọn cuộc trò chuyện</h3>
+  <!-- Khung chat -->
+  <section class="chat-main">
+    <header class="chat-header">
+      <h3>{{ chatTitle }}</h3>
+      <span class="status" *ngIf="isLoadingHistory">Đang tải...</span>
+    </header>
+
+    <div class="chat-messages">
+      <div *ngFor="let m of messages"
+           class="msg" [class.sent]="m.type==='sent'" [class.received]="m.type==='received'">
+        <div class="bubble">
+          <div class="text">{{ m.text }}</div>
+          <div class="time">{{ m.time }}</div>
+        </div>
       </div>
+    </div>
 
-      <div id="chat-messages" class="chat-messages"></div>
-
-      <form id="chat-form" class="chat-input">
-        <input id="chat-input" type="text" placeholder="Nhập tin nhắn..." required>
-        <button type="submit">Send</button>
-      </form>
-    </section>
-  </div>
-
-  <script src="chat.js"></script>
-</body>
-</html>
+    <footer class="chat-input">
+      <input type="text" placeholder="Nhập tin nhắn..."
+             [(ngModel)]="newMessage" (keyup.enter)="send()"
+             [disabled]="!currentChatId || isSending" />
+      <button type="button" (click)="send()" [disabled]="!currentChatId || isSending">Gửi</button>
+    </footer>
+  </section>
+</div>
