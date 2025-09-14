@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "sockjs-client": "^1.6.1",
+    "stompjs": "^2.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.3",
+    "@types/sockjs-client": "^1.5.4",
+    "@types/stompjs": "^2.3.9"
+  }
+}

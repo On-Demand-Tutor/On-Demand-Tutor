@@ -4,7 +4,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": [],
+    "types": ["node"],
     "lib": ["ES2022", "dom"]
   },
   "include": [
@@ -13,4 +13,5 @@
   "exclude": [
     "src/**/*.spec.ts"
   ]
+  
 }

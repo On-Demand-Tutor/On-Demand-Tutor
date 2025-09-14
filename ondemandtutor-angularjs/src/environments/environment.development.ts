@@ -5,6 +5,8 @@ export const environment = {
     tutorService: '/api/tutors',
     userService: '/api/users',
     feedbackService: '/api/feedbacks',
-    adminService: '/api/admin'
+    adminService: '/api/admin',
+    chatService: '/api/chat',
+    chatsService: '/api/chats'
   }
 };

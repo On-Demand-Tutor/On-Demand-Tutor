@@ -1,0 +1,52 @@
+<header>
+  <div class="container">
+    <h1 class="logo">On-Demand-Tutor</h1>
+    <nav>
+      <ul>
+        <li><a routerLink="/home">Trang chủ</a></li>
+        <li><a routerLink="/search_tutor">Tìm gia sư</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="profile-page">
+  <!-- Sidebar -->
+  <aside class="sidebar-profile">
+    <div class="profile-avatar">
+      <img [src]="avatar || 'https://placehold.co/80x80?text=User'" alt="User Avatar" />
+      <h3>{{ username }}</h3>
+    </div>
+    <ul class="sidebar-menu-tutor">
+      <li><a (click)="goUpdateProfile()">✏️ Chỉnh sửa hồ sơ</a></li>
+      <li><a class="btn chat-btn" (click)="goChatList()">💬 Chat ngay</a></li>
+      <li><a (click)="logout()">🚪 Đăng xuất</a></li>
+    </ul>
+  </aside>
+
+  <!-- Content -->
+  <section class="profile-content" *ngIf="!isLoading; else loadingTpl">
+    <div class="card">
+      <h2>📌 Thông tin tài khoản</h2>
+      <div class="info-row"><b>Vai trò:</b> {{ userRole }}</div>
+      <div *ngIf="userRole === 'student'" class="info-row">
+        <b>Lớp:</b> {{ grade }}</div>
+      <ng-container *ngIf="userRole === 'tutor'">
+        <div class="info-row"><b>Trình độ:</b> {{ qualifications }}</div>
+        <div class="info-row"><b>Kỹ năng:</b> {{ skills }}</div>
+        <div class="info-row"><b>Lớp dạy:</b> {{ teachingGrades }}</div>
+        <div class="info-row"><b>Giá dạy:</b> {{ price | currency:'VND' }}/h</div>
+        <div class="info-row"><b>Mô tả:</b> {{ description }}</div>
+      </ng-container>
+    </div>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </section>
+
+  <!-- Loading -->
+  <ng-template #loadingTpl>
+    <div class="card loading-card">
+      <p>⏳ Đang tải thông tin...</p>
+    </div>
+  </ng-template>
+</main>
