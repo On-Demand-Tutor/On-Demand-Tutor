@@ -1,0 +1,27 @@
+<div class="page">
+  <div class="booking-card">
+    <h2>Đặt lịch học</h2>
+
+    <div *ngIf="tutor" class="tutor-line">
+      <div class="avatar" [style.background-image]="'url(' + (tutor.promoFile || 'assets/avatar.png') + ')'"></div>
+      <div class="tutor-info">
+        <div class="name">{{ tutor.username }}</div>
+        <div class="email" *ngIf="tutor.email">{{ tutor.email }}</div>
+      </div>
+    </div>
+
+    <form class="booking-form" (ngSubmit)="onSubmit()" #f="ngForm" novalidate>
+      <label for="startTime">Giờ bắt đầu:</label>
+      <input type="datetime-local" id="startTime" name="startTime" [(ngModel)]="startTime" required />
+
+      <label for="endTime">Giờ kết thúc:</label>
+      <input type="datetime-local" id="endTime" name="endTime" [(ngModel)]="endTime" required />
+
+      <button type="submit" [disabled]="isSubmitting || !f.form.valid">
+        {{ isSubmitting ? 'Đang gửi...' : 'Booking' }}
+      </button>
+
+      <div id="message">{{ message }}</div>
+    </form>
+  </div>
+</div>
