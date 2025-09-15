@@ -6,7 +6,7 @@ import { UserService, UserProfile } from '../core/user.service';
 @Component({
   selector: 'app-tutor-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule],  
   templateUrl: './tutor_profile.html',
   styleUrls: ['./tutor_profile.css']
 })
@@ -31,8 +31,7 @@ export class TutorProfileComponent implements OnInit {
       this.isLoading = true;
       this.userService.getUserById(userId).subscribe({
         next: (res: any) => {
-          console.log('User API raw:', res);
-          this.tutor = res?.result ?? res; // lấy object bên trong "result"
+          this.tutor = res?.result ?? res;
           this.isLoading = false;
         },
         error: (err) => {

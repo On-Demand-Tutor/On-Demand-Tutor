@@ -37,7 +37,6 @@ export class BookingComponent implements OnInit {
       this.message = 'ID gia sư không hợp lệ.'; return;
     }
 
-    // Lấy record tutor từ tutor-service theo userId
     this.http.get<any>(`/api/tutors/user/${userId}`).subscribe({
       next: (res) => {
         const t: TutorDto = res?.result ?? res;
@@ -45,9 +44,9 @@ export class BookingComponent implements OnInit {
         this.tutorUserId = t?.userId ?? t?.user_id ?? userId;
         this.prefillTimes();
       },
-      error: (err: any) => {
+      error: (err) => {
         console.error('Load tutor error:', err);
-        this.message = 'Không tải được thông tin gia sư .';
+        this.message = 'Không tải được thông tin gia sư.';
       }
     });
   }
@@ -64,7 +63,9 @@ export class BookingComponent implements OnInit {
     this.endTime = fmt(later);
   }
 
-  private withSeconds(v: string) { return v && v.length === 16 ? `${v}:00` : v; }
+  private withSeconds(v: string) {
+    return v && v.length === 16 ? `${v}:00` : v;
+  }
 
   onSubmit(): void {
     if (!this.tutorUserId) { this.message = 'Thiếu tutorUserId để tạo booking.'; return; }
@@ -76,23 +77,21 @@ export class BookingComponent implements OnInit {
       endTime: this.withSeconds(this.endTime)
     };
 
-    const token =
-      localStorage.getItem('jwt') ||
-      localStorage.getItem('access_token') || '';
-
+    const token = localStorage.getItem('jwt') || localStorage.getItem('access_token') || '';
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
 
     this.isSubmitting = true;
     this.message = 'Đang gửi...';
 
     this.http.post(`/api/bookings/create/${this.tutorUserId}`, payload, { headers }).subscribe({
-next: (res: any) => {
-        this.message = res?.message || 'Đặt lịch thành công!';
+      next: (res: any) => {
+        this.message = res?.message || '✅ Đặt lịch thành công!';
         this.isSubmitting = false;
+        // 👉 Không set localStorage, không redirect
       },
       error: (err: any) => {
         console.error('Booking error:', err);
-        this.message = err?.error?.message || 'Không kết nối được .';
+        this.message = err?.error?.message || 'Không kết nối được.';
         this.isSubmitting = false;
       }
     });
