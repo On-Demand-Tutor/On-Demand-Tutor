@@ -22,7 +22,8 @@
   "/api/admin": {
     "target": "http://localhost:8001",
     "secure": false,
-    "changeOrigin": true
+    "changeOrigin": true,
+    "pathRewrite": {"^/api/admin" : ""}
   }, 
   "/api/bookings": {
   "target": "http://localhost:8089",

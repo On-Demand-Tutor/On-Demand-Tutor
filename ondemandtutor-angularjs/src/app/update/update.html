@@ -18,7 +18,6 @@
         src="https://scontent.fsgn5-8.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s40x40&_nc_cat=1&_nc_sid=f5662c&_nc_ohc=tt8z1knDr6oQ7kNvwFjQZQP&_nc_oc=Adk5B7vST1kxheuDFvqXNcGF0AT-StYQlRAF_N5nEtnIsX2Q8quYivqMwcI7E2Rzf1s&_nc_zt=24&_nc_ht=scontent.fsgn5-8.fna&oh=00_AfUR6sbbnNPL0DBOS2edROl-_BZrbtGnFvF5NT6apAaLkQ&oe=68CB583A"
         class="auth-avatar"
         alt="Avatar"
-        (click)="toggleAvatarMenu()"
       />
 
 
@@ -99,6 +98,22 @@
         Price
         <input type="number" name="price" [(ngModel)]="price" min="0" [disabled]="userRole !== 'tutor'"/>
       </label>
+
+      <ng-container *ngIf="userRole === 'tutor'">
+        <label>
+          Upload files:
+          <input type="file" (change)="onFileSelected($event)" multiple />
+        </label>
+
+        <div *ngIf="promoFiles.length > 0">
+          <p>File đã chọn:</p>
+          <ul>
+            <li *ngFor="let file of promoFiles; let i = index">
+              <a [href]="file" target="_blank">📂 File {{ i + 1 }}</a>
+            </li>
+          </ul>
+        </div>
+      </ng-container>
 
       <button class="btn btn-primary" type="submit">
         {{ isLoading ? 'Đang lưu...' : 'Save Changes' }}

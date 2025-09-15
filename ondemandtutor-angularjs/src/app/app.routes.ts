@@ -10,6 +10,9 @@ import { ProfileComponent } from './profile/profile';
 import { TutorProfileComponent } from './tutor_profile/tutor_profile';
 import { BookingComponent } from './booking/booking';
 import { RatingComponent } from './rating/rating';
+import { AdminEmbedComponent } from './admin/admin-embed';
+import { AdminGuard } from './guards/admin.guard';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -25,4 +28,5 @@ export const routes: Routes = [
   { path: 'booking/:id', component: BookingComponent },
   { path: 'chat/:id', component: ChatComponent },
   { path: 'rating/:tutorUserId', component: RatingComponent }
-];
+  { path: 'admin', component: AdminEmbedComponent, canActivate: [AdminGuard] },
+  ];

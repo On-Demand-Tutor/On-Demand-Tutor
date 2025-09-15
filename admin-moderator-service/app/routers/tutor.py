@@ -4,7 +4,7 @@ from app.services.tutor_service import tutor_service
 from app.services.role_service import role_service
 
 router = APIRouter(
-    prefix="/tutors",
+    prefix="/admin/tutors",
     tags=["Tutor Management"]
 )
 
