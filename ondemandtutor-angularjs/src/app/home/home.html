@@ -28,6 +28,7 @@
 
         <ul class="dropdown" *ngIf="isAvatarMenuOpen">
           <li><a routerLink="/update">Update Profile</a></li>
+          <li *ngIf="userRole === 'admin'"><a routerLink="/admin">Admin Dashboard</a></li>
           <li>
             <a routerLink="/profile" class="btn-profile">Xem hồ sơ</a>
           </li>

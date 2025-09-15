@@ -1,0 +1,1387 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useEffect, useMemo, useState } = React;
+
+      // -----------------------------------------------------------------------------
+      // Configuration
+      // -----------------------------------------------------------------------------
+      const DEV_MOCK = false;
+
+      function getBaseUrl() {
+        // Window globals (for static builds / HTML injection)
+        if (typeof window !== 'undefined') {
+          if (window.__ENV__ && (window.__ENV__.REACT_APP_ADMIN_API_URL || window.__ENV__.ADMIN_API_URL)) {
+            return window.__ENV__.REACT_APP_ADMIN_API_URL || window.__ENV__.ADMIN_API_URL;
+          }
+          if (window.REACT_APP_ADMIN_API_URL) return window.REACT_APP_ADMIN_API_URL;
+          if (window.ADMIN_API_URL) return window.ADMIN_API_URL;
+        }
+        // Final fallback: prefer local admin-moderator-service on 8001; otherwise use Angular proxy path
+        try {
+          if (typeof window !== 'undefined' && window.location && /localhost|127\.0\.0\.1/.test(window.location.hostname)) {
+            return 'http://localhost:8001';
+          }
+        } catch (_) {}
+        return '/api/admin';
+      }
+
+      const baseUrl = getBaseUrl();
+      console.log('Admin Dashboard baseUrl:', baseUrl);
+
+      // -----------------------------------------------------------------------------
+      // Helpers
+      // -----------------------------------------------------------------------------
+      function joinUrl(base, path) {
+        if (!path) return base || '';
+        if (/^https?:\/\//i.test(path)) return path;
+        if (base && path.startsWith(base)) return path;
+        const normalizedBase = (base || '').replace(/\/+$/, '');
+        const normalizedPath = path.replace(/^\/+/, '');
+        return normalizedBase ? `${normalizedBase}/${normalizedPath}` : `/${normalizedPath}`;
+      }
+
+      // -----------------------------------------------------------------------------
+      // Lightweight API hook
+      // -----------------------------------------------------------------------------
+      function useApi(path, deps = []) {
+        const [data, setData] = useState(null);
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState(null);
+
+        const url = useMemo(() => joinUrl(baseUrl, path), [path]);
+
+        useEffect(() => {
+          let mounted = true;
+          const ac = new AbortController();
+          setLoading(true);
+          setError(null);
+
+          const doFetch = async () => {
+            try {
+              if (DEV_MOCK) {
+                if (path.startsWith('/api/admin/users')) {
+                  // Mock pagination response
+                  const mockUsers = [];
+                  for (let i = 1; i <= 25; i++) {
+                    mockUsers.push({
+                      id: i,
+                      email: `user${i}@example.com`,
+                      username: `user${i}`,
+                      role: i === 1 ? 'ADMIN' : (i % 3 === 0 ? 'TUTOR' : 'STUDENT'),
+                      is_active: i % 4 !== 0
+                    });
+                  }
+                  
+                  const pageMatch = path.match(/page=(\d+)/);
+                  const page = pageMatch ? parseInt(pageMatch[1]) : 0;
+                  const pageSize = 10;
+                  const start = page * pageSize;
+                  const end = start + pageSize;
+                  
+                  const mock = {
+                    results: mockUsers.slice(start, end),
+                    count: mockUsers.length,
+                    next: end < mockUsers.length ? `${path.split('?')[0]}?page=${page + 1}` : null,
+                    previous: page > 0 ? `${path.split('?')[0]}?page=${page - 1}` : null
+                  };
+                  
+                  await new Promise((r) => setTimeout(r, 200));
+                  if (mounted) setData(mock);
+                  return;
+                }
+                if (path.startsWith('/api/admin/tutors')) {
+                  const mock = { count: 1, results: [{ id: 10, email: 'tutor@example.com', username: 'tutor1', profile_complete: true }] };
+                  await new Promise((r) => setTimeout(r, 200));
+                  if (mounted) setData(mock);
+                  return;
+                }
+                if (path.startsWith('/api/admin/students')) {
+                  const mock = { count: 1, results: [{ id: 20, email: 'student@example.com', username: 'student1', profile_complete: true }] };
+                  await new Promise((r) => setTimeout(r, 200));
+                  if (mounted) setData(mock);
+                  return;
+                }
+                if (path.includes('/payments')) {
+                  // Mock payments data
+                  const mockPayments = [];
+                  for (let i = 1; i <= 15; i++) {
+                    mockPayments.push({
+                      id: i,
+                      transactionId: `TXN${1000 + i}`,
+                      amount: Math.floor(Math.random() * 1000000) + 50000,
+                      status: ['PENDING', 'COMPLETED', 'FAILED'][Math.floor(Math.random() * 3)],
+                      studentId: Math.floor(Math.random() * 10) + 1,
+                      tutorId: Math.floor(Math.random() * 5) + 1,
+                      createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+                    });
+                  }
+                  
+                  if (path.includes('statistics')) {
+                    const mock = {
+                      total_amount: 15000000,
+                      total_transactions: 15,
+                      average_daily_amount: 2142857,
+                      average_daily_transactions: 2.1,
+                      daily_summaries: [
+                        { date: '2024-01-15', total_amount: 2500000, total_transactions: 3 },
+                        { date: '2024-01-14', total_amount: 1800000, total_transactions: 2 },
+                        { date: '2024-01-13', total_amount: 3200000, total_transactions: 4 },
+                      ]
+                    };
+                    await new Promise((r) => setTimeout(r, 200));
+                    if (mounted) setData(mock);
+                    return;
+                  }
+                  
+                  const pageMatch = path.match(/page=(\d+)/);
+                  const page = pageMatch ? parseInt(pageMatch[1]) : 0;
+                  const pageSize = 10;
+                  const start = page * pageSize;
+                  const end = start + pageSize;
+                  
+                  const mock = {
+                    content: mockPayments.slice(start, end),
+                    totalElements: mockPayments.length,
+                    totalPages: Math.ceil(mockPayments.length / pageSize),
+                    number: page,
+                    size: pageSize
+                  };
+                  
+                  await new Promise((r) => setTimeout(r, 200));
+                  if (mounted) setData(mock);
+                  return;
+                }
+              }
+
+              const res = await fetch(url, {
+                credentials: 'include',
+                headers: { Accept: 'application/json' },
+                signal: ac.signal,
+              });
+              if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+              const json = await res.json();
+              if (mounted) setData(json);
+            } catch (err) {
+              if (!mounted || (err && err.name === 'AbortError')) return;
+              if (mounted) setError(err);
+            } finally {
+              if (mounted) setLoading(false);
+            }
+          };
+
+          doFetch();
+          return () => {
+            mounted = false;
+            ac.abort();
+          };
+        }, [url, ...deps]);
+
+        return { data, loading, error };
+      }
+
+      function Icon({ name }) {
+        return <span className="inline-block w-4">{name}</span>;
+      }
+
+      function EditModal({ isOpen, onClose, user, onSave, type = 'user' }) {
+        const [formData, setFormData] = useState({});
+
+        useEffect(() => {
+          if (user) {
+            setFormData({
+              email: user.email || '',
+              username: user.username || '',
+              role: user.role || '',
+              is_active: user.is_active !== undefined ? user.is_active : true,
+            });
+          }
+        }, [user]);
+
+        if (!isOpen) return null;
+
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          onSave(formData);
+        };
+
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-96 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-semibold mb-4">Edit {type.charAt(0).toUpperCase() + type.slice(1)}</h3>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    className="w-full border px-3 py-2 rounded bg-gray-100"
+                    disabled
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Username</label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                    className="w-full border px-3 py-2 rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Role</label>
+                  <input
+                    type="text"
+                    value={formData.role}
+                    className="w-full border px-3 py-2 rounded bg-gray-100"
+                    disabled
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Role cannot be changed</p>
+                </div>
+                <div>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_active}
+                      className="mr-2"
+                      disabled
+                    />
+                    <span className="text-sm font-medium text-gray-500">Active (cannot be changed)</span>
+                  </label>
+                </div>
+                <div className="flex gap-2 mt-6">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      function TablePagination({ page, totalPages, onPageChange, hasNext, hasPrevious }) {
+        return (
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+              <button
+                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-gray-100"
+                disabled={!hasPrevious}
+                onClick={() => onPageChange(page - 1)}
+              >
+                Previous
+              </button>
+              <div className="text-sm px-2">Trang {page}</div>
+              <button
+                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-gray-100"
+                disabled={!hasNext}
+                onClick={() => onPageChange(page + 1)}
+              >
+                Next
+              </button>
+            </div>
+            <div className="text-sm text-gray-500">
+              {totalPages && `Tổng cộng ${totalPages} trang`}
+            </div>
+          </div>
+        );
+      }
+
+      function SearchFilterRow({ search, setSearch, extraControls }) {
+        return (
+          <div className="flex gap-3 items-center mb-3">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm kiếm... (email, username, id...)"
+              className="border px-3 py-2 rounded w-full"
+            />
+            {extraControls}
+          </div>
+        );
+      }
+
+      function DataTable({ columns, rows, onRowClick, actions, onEdit, onDelete }) {
+        return (
+          <div className="overflow-x-auto bg-white rounded shadow-sm">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-left">
+                <tr>
+                  {columns.map((c) => (
+                    <th key={c.key} className="px-4 py-2 font-medium">{c.title}</th>
+                  ))}
+                  {(actions || onEdit || onDelete) && <th className="px-4 py-2">Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {rows?.length ? (
+                  rows.map((r) => (
+                    <tr key={r.id ?? JSON.stringify(r)} className="border-t hover:bg-gray-50 cursor-pointer">
+                      {columns.map((c) => (
+                        <td
+                          onClick={() => onRowClick && onRowClick(r)}
+                          key={c.key}
+                          className="px-4 py-3"
+                        >
+                          {c.render ? c.render(r) : r[c.key]}
+                        </td>
+                      ))}
+                      {(actions || onEdit || onDelete) && (
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            {actions && actions.map((a, i) => (
+                              <button
+                                key={i}
+                                onClick={(ev) => { ev.stopPropagation(); a.onClick(r); }}
+                                className="px-2 py-1 text-sm rounded border"
+                              >
+                                {a.label}
+                              </button>
+                            ))}
+                            {onEdit && (
+                              <button
+                                onClick={(ev) => { ev.stopPropagation(); onEdit(r); }}
+                                className="px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                              >
+                                Edit
+                              </button>
+                            )}
+                            {onDelete && (
+                              <button
+                                onClick={(ev) => { ev.stopPropagation(); onDelete(r); }}
+                                className="px-2 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={(columns.length + ((actions || onEdit || onDelete) ? 1 : 0))} className="px-4 py-6 text-center text-gray-500">
+                      Không có dữ liệu
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+
+      // ======== SEPARATE TAB COMPONENTS ========
+
+      function PaymentsList() {
+        const [page, setPage] = useState(1);
+        const [pageSize] = useState(10);
+        const [search, setSearch] = useState('');
+        const [filters, setFilters] = useState({
+          status: '',
+          student_id: '',
+          tutor_id: '',
+          sort_by: 'createdAt',
+          sort_dir: 'desc'
+        });
+
+        const { data: paymentsData, loading: paymentsLoading, error: paymentsError } = useApi(
+          `/api/admin/payments?page=${page - 1}&size=${pageSize}${filters.status ? `&status=${filters.status}` : ''}${filters.student_id ? `&student_id=${filters.student_id}` : ''}${filters.tutor_id ? `&tutor_id=${filters.tutor_id}` : ''}&sort_by=${filters.sort_by}&sort_dir=${filters.sort_dir}`,
+          [page, pageSize, filters]
+        );
+
+        const { data: statsData } = useApi(`/api/admin/payments/statistics/summary?days=7`, []);
+
+        const payments = paymentsData?.content || [];
+        const filteredPayments = search 
+          ? payments.filter(payment => 
+              [payment.studentId, payment.tutorId, payment.transactionId, payment.status]
+                .filter(Boolean)
+                .some(v => String(v).toLowerCase().includes(search.toLowerCase()))
+            )
+          : payments;
+
+        const totalPages = Math.max(1, Math.ceil((paymentsData?.totalElements || 0) / pageSize));
+        const hasNext = page < totalPages;
+        const hasPrevious = page > 1;
+
+        return (
+          <div>
+            <div className="mb-4 space-y-3">
+              <div className="flex gap-3 items-center">
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Tìm kiếm... (ID, status, student, tutor...)"
+                  className="border px-3 py-2 rounded flex-1"
+                />
+                <select
+                  value={filters.status}
+                  onChange={(e) => setFilters({...filters, status: e.target.value})}
+                  className="border px-3 py-2 rounded"
+                >
+                  <option value="">All Status</option>
+                  <option value="PENDING">PENDING</option>
+                  <option value="COMPLETED">SUCCESS</option>
+                  <option value="FAILED">FAILED</option>
+                </select>
+                <select
+                  value={filters.sort_by}
+                  onChange={(e) => setFilters({...filters, sort_by: e.target.value})}
+                  className="border px-3 py-2 rounded"
+                >
+                  <option value="createdAt">Created Date</option>
+                  <option value="amount">Amount</option>
+                  <option value="status">Status</option>
+                </select>
+                <select
+                  value={filters.sort_dir}
+                  onChange={(e) => setFilters({...filters, sort_dir: e.target.value})}
+                  className="border px-3 py-2 rounded"
+                >
+                  <option value="desc">Desc</option>
+                  <option value="asc">Asc</option>
+                </select>
+              </div>
+              <div className="text-sm text-gray-600">
+                Total: {paymentsData?.totalElements || 0} payments
+                {statsData && (
+                  <span className="ml-4">
+                    7-day total: {statsData.total_amount?.toLocaleString() || 0} VND
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {paymentsError && (
+              <div className="mb-3 text-sm text-red-600">
+                Error loading payments: {String(paymentsError.message || paymentsError)}
+              </div>
+            )}
+
+            {paymentsLoading ? (
+              <div className="text-center py-8">Loading payments...</div>
+            ) : (
+              <DataTable
+                columns={[
+                  { key: 'id', title: 'ID' },
+                  { 
+                    key: 'transactionId', 
+                    title: 'Transaction ID',
+                    render: (r) => r.transactionId || 'N/A'
+                  },
+                  { 
+                    key: 'amount', 
+                    title: 'Amount',
+                    render: (r) => (r.amount || r.totalAmount || 0).toLocaleString() + ' VND'
+                  },
+                  { 
+                    key: 'status', 
+                    title: 'Status',
+                    render: (r) => (
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        r.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                        r.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                        r.status === 'FAILED' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {r.status || 'UNKNOWN'}
+                      </span>
+                    )
+                  },
+                  { 
+                    key: 'studentId', 
+                    title: 'Student ID',
+                    render: (r) => r.studentId || 'N/A'
+                  },
+                  { 
+                    key: 'tutorId', 
+                    title: 'Tutor ID',
+                    render: (r) => r.tutorId || 'N/A'
+                  },
+                  { 
+                    key: 'createdAt', 
+                    title: 'Created',
+                    render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'N/A'
+                  }
+                ]}
+                rows={filteredPayments}
+                onRowClick={(payment) => {
+                  console.log('Payment clicked:', payment);
+                }}
+              />
+            )}
+
+            <TablePagination 
+              page={page} 
+              totalPages={totalPages}
+              hasNext={hasNext}
+              hasPrevious={hasPrevious}
+              onPageChange={setPage} 
+            />
+          </div>
+        );
+      }
+
+      function PaymentsStatistics() {
+        const { data: statsData, loading: statsLoading } = useApi(`/api/admin/payments/statistics/summary?days=7`, []);
+
+        if (statsLoading) {
+          return <div className="text-center py-8">Loading statistics...</div>;
+        }
+
+        return (
+          <div className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-blue-50 p-4 rounded">
+                <div className="text-2xl font-bold text-blue-600">
+                  {statsData?.total_amount?.toLocaleString() || '0'}
+                </div>
+                <div className="text-sm text-blue-800">Total Amount (7d)</div>
+              </div>
+              <div className="bg-green-50 p-4 rounded">
+                <div className="text-2xl font-bold text-green-600">
+                  {statsData?.total_transactions || 0}
+                </div>
+                <div className="text-sm text-green-800">Total Transactions (7d)</div>
+              </div>
+              <div className="bg-yellow-50 p-4 rounded">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {statsData?.average_daily_amount?.toLocaleString() || '0'}
+                </div>
+                <div className="text-sm text-yellow-800">Avg Daily Amount</div>
+              </div>
+              <div className="bg-purple-50 p-4 rounded">
+                <div className="text-2xl font-bold text-purple-600">
+                  {Math.round(statsData?.average_daily_transactions || 0)}
+                </div>
+                <div className="text-sm text-purple-800">Avg Daily Transactions</div>
+              </div>
+            </div>
+
+            {/* Daily Breakdown */}
+            {statsData?.daily_summaries && (
+              <div>
+                <h4 className="text-lg font-semibold mb-3">Daily Breakdown (Last 7 Days)</h4>
+                <div className="overflow-x-auto bg-white rounded shadow-sm">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left">Date</th>
+                        <th className="px-4 py-2 text-right">Amount</th>
+                        <th className="px-4 py-2 text-right">Transactions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsData.daily_summaries.map((day, index) => (
+                        <tr key={index} className="border-t">
+                          <td className="px-4 py-2">{day.date}</td>
+                          <td className="px-4 py-2 text-right">
+                            {day.total_amount?.toLocaleString() || '0'} VND
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            {day.total_transactions || 0}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      function DailySummary() {
+        const [summaryDate, setSummaryDate] = useState(new Date().toISOString().split('T')[0]);
+        const [summaryData, setSummaryData] = useState(null);
+        const [summaryLoading, setSummaryLoading] = useState(false);
+
+        const loadDailySummary = async () => {
+          if (!summaryDate) return;
+          
+          setSummaryLoading(true);
+          try {
+            const response = await fetch(
+              joinUrl(baseUrl, `/api/admin/payments/daily-summary/${summaryDate}`),
+              { credentials: 'include' }
+            );
+            
+            if (response.ok) {
+              const data = await response.json();
+              setSummaryData(data);
+            } else {
+              setSummaryData(null);
+            }
+          } catch (error) {
+            console.error('Error loading daily summary:', error);
+            setSummaryData(null);
+          }
+          setSummaryLoading(false);
+        };
+
+        const generateDailySummary = async () => {
+          if (!summaryDate) return;
+          
+          try {
+            const response = await fetch(
+              joinUrl(baseUrl, `/api/admin/payments/daily-summary/generate`),
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ date: summaryDate })
+              }
+            );
+            
+            if (response.ok) {
+              alert('Daily summary generation started. Please wait and reload.');
+            } else {
+              alert('Failed to generate daily summary');
+            }
+          } catch (error) {
+            alert('Error generating daily summary: ' + error.message);
+          }
+        };
+
+        return (
+          <div className="space-y-4">
+            <div className="flex gap-3 items-center">
+              <input
+                type="date"
+                value={summaryDate}
+                onChange={(e) => setSummaryDate(e.target.value)}
+                className="border px-3 py-2 rounded"
+              />
+              <button
+                onClick={loadDailySummary}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                disabled={summaryLoading}
+              >
+                {summaryLoading ? 'Loading...' : 'Load Summary'}
+              </button>
+              <button
+                onClick={generateDailySummary}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Generate Summary
+              </button>
+            </div>
+
+            {summaryData && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 p-4 rounded">
+                    <div className="text-xl font-bold text-blue-600">
+                      {summaryData.total_amount?.toLocaleString() || '0'} VND
+                    </div>
+                    <div className="text-sm text-blue-800">Total Amount</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded">
+                    <div className="text-xl font-bold text-green-600">
+                      {summaryData.total_transactions || 0}
+                    </div>
+                    <div className="text-sm text-green-800">Total Transactions</div>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded">
+                    <div className="text-xl font-bold text-yellow-600">
+                      {summaryData.average_transaction_amount?.toLocaleString() || '0'} VND
+                    </div>
+                    <div className="text-sm text-yellow-800">Avg Transaction</div>
+                  </div>
+                </div>
+
+                {summaryData.payments_by_status && Object.keys(summaryData.payments_by_status).length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold mb-2">By Status</h4>
+                    <div className="bg-white p-4 rounded border">
+                      {Object.entries(summaryData.payments_by_status).map(([status, amount]) => (
+                        <div key={status} className="flex justify-between py-1">
+                          <span>{status}:</span>
+                          <span className="font-medium">{amount.toLocaleString()} VND</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {summaryData === null && !summaryLoading && (
+              <div className="text-center py-8 text-gray-500">
+                No summary data found for {summaryDate}. Click "Generate Summary" to create one.
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      function PeriodSummary() {
+        const [selectedDateRange, setSelectedDateRange] = useState({
+          start: '',
+          end: ''
+        });
+        const [periodData, setPeriodData] = useState(null);
+        const [periodLoading, setPeriodLoading] = useState(false);
+
+        const loadPeriodSummary = async () => {
+          if (!selectedDateRange.start || !selectedDateRange.end) {
+            alert('Please select both start and end dates');
+            return;
+          }
+          
+          setPeriodLoading(true);
+          try {
+            const response = await fetch(
+              joinUrl(baseUrl, `/api/admin/payments/daily-summary/period/${selectedDateRange.start}/${selectedDateRange.end}`),
+              { credentials: 'include' }
+            );
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Period summary data:', data);
+              setPeriodData(data);
+            } else {
+              console.error('Load period summary failed:', response.status, response.statusText);
+              setPeriodData(null);
+              const errorText = await response.text().catch(() => response.statusText);
+              alert(`Error loading period summary: ${response.status} - ${errorText}`);
+            }
+          } catch (error) {
+            console.error('Error loading period summary:', error);
+            setPeriodData(null);
+            alert('Network error loading period summary: ' + error.message);
+          }
+          setPeriodLoading(false);
+        };
+
+        return (
+          <div className="space-y-4">
+            <div className="flex gap-3 items-center">
+              <input
+                type="date"
+                value={selectedDateRange.start}
+                onChange={(e) => setSelectedDateRange({...selectedDateRange, start: e.target.value})}
+                className="border px-3 py-2 rounded"
+              />
+              <span>to</span>
+              <input
+                type="date"
+                value={selectedDateRange.end}
+                onChange={(e) => setSelectedDateRange({...selectedDateRange, end: e.target.value})}
+                className="border px-3 py-2 rounded"
+              />
+              <button
+                onClick={loadPeriodSummary}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                disabled={periodLoading}
+              >
+                {periodLoading ? 'Loading...' : 'Load Period'}
+              </button>
+            </div>
+
+            {periodData && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 p-4 rounded">
+                    <div className="text-xl font-bold text-blue-600">
+                      {periodData.total_amount?.toLocaleString() || '0'} VND
+                    </div>
+                    <div className="text-sm text-blue-800">Total Amount</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded">
+                    <div className="text-xl font-bold text-green-600">
+                      {periodData.total_transactions || 0}
+                    </div>
+                    <div className="text-sm text-green-800">Total Transactions</div>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded">
+                    <div className="text-xl font-bold text-yellow-600">
+                      {periodData.total_days || 0}
+                    </div>
+                    <div className="text-sm text-yellow-800">Days</div>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded">
+                    <div className="text-xl font-bold text-purple-600">
+                      {periodData.average_daily_amount?.toLocaleString() || '0'} VND
+                    </div>
+                    <div className="text-sm text-purple-800">Avg Daily</div>
+                  </div>
+                </div>
+
+                {periodData.daily_summaries && periodData.daily_summaries.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold mb-3">Daily Breakdown</h4>
+                    <div className="overflow-x-auto bg-white rounded shadow-sm max-h-96">
+                      <table className="min-w-full text-sm">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left">Date</th>
+                            <th className="px-4 py-2 text-right">Amount</th>
+                            <th className="px-4 py-2 text-right">Transactions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {periodData.daily_summaries.map((day, index) => (
+                            <tr key={index} className="border-t">
+                              <td className="px-4 py-2">{day.date}</td>
+                              <td className="px-4 py-2 text-right">
+                                {day.total_amount?.toLocaleString() || '0'} VND
+                              </td>
+                              <td className="px-4 py-2 text-right">
+                                {day.total_transactions || 0}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {periodData === null && !periodLoading && selectedDateRange.start && selectedDateRange.end && (
+              <div className="text-center py-8 text-gray-500">
+                No data found for the selected period.
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      function AdminDashboard() {
+        const [section, setSection] = useState('users');
+
+        return (
+          <div className="min-h-screen bg-gray-100 text-gray-800">
+            <div className="max-w-7xl mx-auto p-4">
+              <div className="grid grid-cols-12 gap-6">
+                <aside className="col-span-12 md:col-span-3 bg-white p-4 rounded shadow-sm">
+                  <h2 className="text-xl font-semibold mb-4">Admin Moderator</h2>
+                  <nav className="flex flex-col gap-2">
+                    <button onClick={() => setSection('users')} className={`text-left px-3 py-2 rounded ${section==='users' ? 'bg-indigo-50 font-semibold' : ''}`}>Users</button>
+                    <button onClick={() => setSection('tutors')} className={`text-left px-3 py-2 rounded ${section==='tutors' ? 'bg-indigo-50 font-semibold' : ''}`}>Tutors</button>
+                    <button onClick={() => setSection('students')} className={`text-left px-3 py-2 rounded ${section==='students' ? 'bg-indigo-50 font-semibold' : ''}`}>Students</button>
+                    <button onClick={() => setSection('payments')} className={`text-left px-3 py-2 rounded ${section==='payments' ? 'bg-indigo-50 font-semibold' : ''}`}>Payments</button>
+                  </nav>
+                  <div className="mt-6 text-xs text-gray-500">
+                    <div>Email admin: <span className="font-medium">adminadmin@gmail.com</span></div>
+                    <div>Auto-login: enabled</div>
+                    {baseUrl ? (
+                      <div className="mt-1">API: <span className="font-mono">{baseUrl}</span></div>
+                    ) : (
+                      <div className="mt-1 text-red-600">Chưa cấu hình ADMIN_API_URL</div>
+                    )}
+                  </div>
+                </aside>
+
+                <main className="col-span-12 md:col-span-9">
+                  <div className="bg-white p-4 rounded shadow-sm">
+                    <Header section={section} />
+                    <SectionRenderer section={section} />
+                  </div>
+                </main>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function Header({ section }) {
+        const handleSignOut = async () => {
+          try {
+            const url = joinUrl(baseUrl, '/api/auth/logout/');
+            await fetch(url, { method: 'POST', credentials: 'include' });
+            if (typeof window !== 'undefined') window.location.href = '/login';
+          } catch (_) {}
+        };
+
+        return (
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold capitalize">{section}</h3>
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-gray-600">Role-based access: Admin</div>
+              <button className="px-3 py-1 rounded border" onClick={handleSignOut}>Sign out</button>
+            </div>
+          </div>
+        );
+      }
+
+      function SectionRenderer({ section }) {
+        switch (section) {
+          case 'users': return <UsersSection />;
+          case 'tutors': return <TutorsSection />;
+          case 'students': return <StudentsSection />;
+          case 'payments': return <PaymentsSection />;
+          default: return null;
+        }
+      }
+
+      /* ---------------- Users Section ---------------- */
+      function UsersSection() {
+        const [page, setPage] = useState(1);
+        const [pageSize] = useState(10);
+        const [search, setSearch] = useState('');
+        const [editingUser, setEditingUser] = useState(null);
+        const [showEditModal, setShowEditModal] = useState(false);
+
+        // Convert 1-based page to 0-based for API
+        const { data, loading, error } = useApi(`/api/admin/users/?page=${page - 1}`, [page]);
+
+        console.log('Users API - data:', data);
+        console.log('Users API - loading:', loading);
+        console.log('Users API - error:', error);
+
+        // Handle different response formats
+        let allUsers = [];
+        let totalCount = 0;
+        let hasNext = false;
+        let hasPrevious = false;
+
+        if (data) {
+          if (Array.isArray(data)) {
+            // If backend returns array directly
+            allUsers = data;
+            totalCount = data.length;
+          } else if (data.results) {
+            // If backend returns paginated response
+            allUsers = data.results;
+            totalCount = data.count || 0;
+            hasNext = !!data.next;
+            hasPrevious = !!data.previous;
+          }
+        }
+        
+        // Apply search filter
+        const filteredUsers = search 
+          ? allUsers.filter(user => 
+              [user.email, user.username, String(user.id)]
+                .filter(Boolean)
+                .some(v => String(v).toLowerCase().includes(search.toLowerCase()))
+            )
+          : allUsers;
+        
+        const totalPages = Math.ceil(totalCount / pageSize);
+
+        const handleEdit = (user) => {
+          setEditingUser(user);
+          setShowEditModal(true);
+        };
+
+        const handleSave = async (formData) => {
+          try {
+            const url = joinUrl(baseUrl, `/api/admin/users/${editingUser.id}`);
+            
+            const updateData = {
+              username: formData.username,
+            };
+            
+            console.log('Sending update data:', updateData);
+            
+            const response = await fetch(url, {
+              method: 'PUT',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify(updateData)
+            });
+            
+            console.log('Update response status:', response.status);
+            
+            if (response.ok) {
+              setShowEditModal(false);
+              setEditingUser(null);
+              // Refresh current page
+              window.location.reload();
+            } else {
+              const errorText = await response.text();
+              console.error('Update failed:', errorText);
+              alert('Failed to update user: ' + errorText);
+            }
+          } catch (error) {
+            console.error('Update error:', error);
+            alert('Error updating user: ' + error.message);
+          }
+        };
+
+        const handleDelete = async (user) => {
+          if (!confirm(`Are you sure you want to delete user ${user.username}?`)) return;
+          
+          try {
+            const url = joinUrl(baseUrl, `/api/admin/users/${user.id}`);
+            const response = await fetch(url, {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              // Refresh current page
+              window.location.reload();
+            } else {
+              alert('Failed to delete user');
+            }
+          } catch (error) {
+            alert('Error deleting user: ' + error.message);
+          }
+        };
+
+        return (
+          <div>
+            <SearchFilterRow 
+              search={search} 
+              setSearch={setSearch} 
+              extraControls={
+                <div className="text-sm">
+                  Tổng: {totalCount} users
+                  {filteredUsers.length !== allUsers.length && ` (filtered: ${filteredUsers.length})`}
+                </div>
+              } 
+            />
+
+            {error && <div className="mb-3 text-sm text-red-600">Lỗi khi tải dữ liệu: {String(error.message || error)}</div>}
+
+            {loading ? <div>Loading...</div> : (
+              <DataTable
+                columns={[
+                  { key: 'id', title: 'ID' },
+                  { key: 'email', title: 'Email' },
+                  { key: 'username', title: 'Username' },
+                  { key: 'role', title: 'Role' },
+                  { key: 'is_active', title: 'Active', render: (r) => r.is_active ? 'Yes' : 'No' }
+                ]}
+                rows={filteredUsers}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
+
+            <TablePagination 
+              page={page} 
+              totalPages={totalPages}
+              hasNext={hasNext}
+              hasPrevious={hasPrevious || page > 1}
+              onPageChange={setPage} 
+            />
+
+            <EditModal
+              isOpen={showEditModal}
+              onClose={() => { setShowEditModal(false); setEditingUser(null); }}
+              user={editingUser}
+              onSave={handleSave}
+              type="user"
+            />
+          </div>
+        );
+      }
+
+      /* ---------------- Tutors Section ---------------- */
+      function TutorsSection() {
+        const [search, setSearch] = useState('');
+        const [editingTutor, setEditingTutor] = useState(null);
+        const [showEditModal, setShowEditModal] = useState(false);
+
+        const { data, loading, error } = useApi(`/api/admin/tutors/`, []);
+
+        const tutorItems = Array.isArray(data?.tutors) ? data.tutors : [];
+        const filtered = search
+          ? tutorItems.filter((t) =>
+              [t.email, t.username, String(t.user_id)]
+                .filter(Boolean)
+                .some((v) => String(v).toLowerCase().includes(search.toLowerCase()))
+            )
+          : tutorItems;
+
+        const rows = filtered.map((t) => ({
+          id: t.user_id,
+          email: t.email,
+          username: t.username,
+          role: t.role || 'TUTOR',
+          qualifications: t.tutor_details?.qualifications ?? '',
+          skills: t.tutor_details?.skills ?? '',
+          teaching_grades: t.tutor_details?.teachingGrades ?? t.tutor_details?.teaching_grades ?? '',
+          verified: Boolean(t.tutor_details?.verified),
+          is_active: t.is_active !== undefined ? t.is_active : true,
+          price: t.tutor_details?.price ?? '',
+        }));
+
+        const handleEdit = (tutor) => {
+          setEditingTutor(tutor);
+          setShowEditModal(true);
+        };
+
+        const handleSave = async (formData) => {
+          try {
+            const url = joinUrl(baseUrl, `/api/admin/users/${editingTutor.id}`);
+            const response = await fetch(url, {
+              method: 'PUT',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+              setShowEditModal(false);
+              setEditingTutor(null);
+              window.location.reload();
+            } else {
+              alert('Failed to update tutor');
+            }
+          } catch (error) {
+            alert('Error updating tutor: ' + error.message);
+          }
+        };
+
+        const handleDelete = async (tutor) => {
+          if (!confirm(`Are you sure you want to delete tutor ${tutor.username}?`)) return;
+          
+          try {
+            const url = joinUrl(baseUrl, `/api/admin/users/${tutor.id}`);
+            const response = await fetch(url, {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              alert('Failed to delete tutor');
+            }
+          } catch (error) {
+            alert('Error deleting tutor: ' + error.message);
+          }
+        };
+
+        return (
+          <div>
+            <SearchFilterRow
+              search={search}
+              setSearch={setSearch}
+              extraControls={<div className="text-sm">Total tutors: {tutorItems.length}</div>}
+            />
+
+            {error && (
+              <div className="mb-3 text-sm text-red-600">Lỗi khi tải dữ liệu: {String(error.message || error)}</div>
+            )}
+
+            {loading ? (
+              <div>Loading...</div>
+            ) : (
+              <DataTable
+                columns={[
+                  { key: 'id', title: 'ID' },
+                  { key: 'email', title: 'Email' },
+                  { key: 'username', title: 'Username' },
+                  { key: 'role', title: 'Role' },
+                  { key: 'qualifications', title: 'Qualifications' },
+                  { key: 'skills', title: 'Skills' },
+                  { key: 'teaching_grades', title: 'Teaching Grades' },
+                  { key: 'verified', title: 'Verified', render: (r) => (r.verified ? 'Yes' : 'No') },
+                  { key: 'price', title: 'Price', render: (r) => (r.price || 'N/A') }
+                ]}
+                rows={rows}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
+
+            <EditModal
+              isOpen={showEditModal}
+              onClose={() => { setShowEditModal(false); setEditingTutor(null); }}
+              user={editingTutor}
+              onSave={handleSave}
+              type="tutor"
+            />
+          </div>
+        );
+      }
+
+      /* ---------------- Students Section ---------------- */
+      function StudentsSection() {
+        const [search, setSearch] = useState('');
+        const [editingStudent, setEditingStudent] = useState(null);
+        const [showEditModal, setShowEditModal] = useState(false);
+        
+        const { data, loading, error } = useApi(`/api/admin/students/`, []);
+
+        const studentItems = Array.isArray(data?.students) ? data.students : [];
+        const filtered = search
+          ? studentItems.filter((s) =>
+              [s.email, s.username, String(s.user_id)]
+                .filter(Boolean)
+                .some((v) => String(v).toLowerCase().includes(search.toLowerCase()))
+            )
+          : studentItems;
+
+        const rows = filtered.map((s) => ({
+          id: s.user_id,
+          email: s.email,
+          username: s.username,
+          role: s.role || 'STUDENT',
+          profile_complete: Boolean(s.has_student_profile),
+          grade: s.student_details?.grade || 'N/A',
+          is_active: s.is_active !== undefined ? s.is_active : true,
+        }));
+
+        const handleEdit = (student) => {
+          setEditingStudent(student);
+          setShowEditModal(true);
+        };
+
+        const handleSave = async (formData) => {
+          try {
+            const url = joinUrl(baseUrl, `/api/admin/users/${editingStudent.id}`);
+            const response = await fetch(url, {
+              method: 'PUT',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+              setShowEditModal(false);
+              setEditingStudent(null);
+              window.location.reload();
+            } else {
+              alert('Failed to update student');
+            }
+          } catch (error) {
+            alert('Error updating student: ' + error.message);
+          }
+        };
+
+        const handleDelete = async (student) => {
+          if (!confirm(`Are you sure you want to delete student ${student.username}?`)) return;
+          
+          try {
+            const url = joinUrl(baseUrl, `/api/admin/users/${student.id}`);
+            const response = await fetch(url, {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              alert('Failed to delete student');
+            }
+          } catch (error) {
+            alert('Error deleting student: ' + error.message);
+          }
+        };
+
+        return (
+          <div>
+            <SearchFilterRow
+              search={search}
+              setSearch={setSearch}
+              extraControls={<div className="text-sm">Total students: {studentItems.length}</div>}
+            />
+
+            {error && <div className="mb-3 text-sm text-red-600">Lỗi khi tải dữ liệu: {String(error.message || error)}</div>}
+
+            {loading ? (
+              <div>Loading...</div>
+            ) : (
+              <DataTable
+                columns={[
+                  { key: 'id', title: 'ID' },
+                  { key: 'email', title: 'Email' },
+                  { key: 'username', title: 'Username' },
+                  { key: 'role', title: 'Role' },
+                  { key: 'profile_complete', title: 'Profile', render: (r) => (r.profile_complete ? 'Yes' : 'No') },
+                  { key: 'grade', title: 'Grade', render: (r) => (r.grade || 'N/A') }
+                ]}
+                rows={rows}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
+
+            <EditModal
+              isOpen={showEditModal}
+              onClose={() => { setShowEditModal(false); setEditingStudent(null); }}
+              user={editingStudent}
+              onSave={handleSave}
+              type="student"
+            />
+          </div>
+        );
+      }
+
+      // ======== PAYMENTS SECTION ========
+      function PaymentsSection() {
+        const [activeTab, setActiveTab] = useState('list');
+
+        return (
+          <div>
+            {/* Tab Navigation */}
+            <div className="flex gap-2 mb-4 border-b">
+              <button
+                onClick={() => setActiveTab('list')}
+                className={`px-4 py-2 rounded-t ${activeTab === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+              >
+                Payments List
+              </button>
+              <button
+                onClick={() => setActiveTab('statistics')}
+                className={`px-4 py-2 rounded-t ${activeTab === 'statistics' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+              >
+                Statistics
+              </button>
+              <button
+                onClick={() => setActiveTab('daily')}
+                className={`px-4 py-2 rounded-t ${activeTab === 'daily' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+              >
+                Daily Summary
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'list' && <PaymentsList />}
+            {activeTab === 'statistics' && <PaymentsStatistics />}
+            {activeTab === 'daily' && <DailySummary />}
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<AdminDashboard />);
+    </script>
+  </body>
+  </html>
