@@ -9,6 +9,8 @@ import { SearchOnlyComponent } from './search_only/search_only';
 import { ProfileComponent } from './profile/profile';
 import { TutorProfileComponent } from './tutor_profile/tutor_profile';
 import { BookingComponent } from './booking/booking';
+import { AdminEmbedComponent } from './admin/admin-embed';
+import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -23,4 +25,5 @@ export const routes: Routes = [
   { path: 'tutor/:id', component: TutorProfileComponent },
   { path: 'booking/:id', component: BookingComponent },
   //{ path: 'chat/:id', component: ChatComponent },
+  { path: 'admin', component: AdminEmbedComponent, canActivate: [AdminGuard] },
 ];

@@ -64,7 +64,23 @@ export class LoginComponent implements OnInit {
       .subscribe({
         next: () => {
           this.successMessage = 'Đăng nhập thành công! Đang chuyển hướng...';
-          setTimeout(() => this.router.navigateByUrl('/home', { replaceUrl: true }), 800);
+          const userRole = this.auth.getUserRole();
+          let redirectPath = '/home'; // default
+          let redirectMessage = 'Đang chuyển hướng...';
+      
+          if (userRole === 'admin') {
+            redirectPath = '/admin';
+            redirectMessage = 'Đang chuyển hướng đến trang quản trị...';
+          } else if (userRole === 'tutor') {
+            redirectPath = '/home';
+            redirectMessage = 'Đang chuyển hướng đến trang chủ...';
+          } else if (userRole === 'student') {
+            redirectPath = '/home';
+            redirectMessage = 'Đang chuyển hướng đến trang chủ...';
+          }
+      
+          this.successMessage = `Đăng nhập thành công! ${redirectMessage}`;
+          setTimeout(() => this.router.navigateByUrl(redirectPath, { replaceUrl: true }), 800);
         },
         error: (err) => {
           if (err?.status === 0)       this.errorMessage = 'Không kết nối được máy chủ.';
