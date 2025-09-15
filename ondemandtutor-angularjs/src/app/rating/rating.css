@@ -1,0 +1,60 @@
+/* Nền hồng nhạt giống booking + khung giữa màn hình */
+.rating-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffe6f2;
+  padding: 24px;
+}
+
+.rating-container {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 400px;
+}
+
+.stars span {
+  font-size: 30px;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.stars span.selected {
+  color: yellow;
+}
+
+textarea {
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background: #ff66a3;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+button[disabled] {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+button:hover:not([disabled]) {
+  background: #ff3385;
+}
+
+p[role="status"] {
+  margin-top: 12px;
+  font-weight: 600;
+}

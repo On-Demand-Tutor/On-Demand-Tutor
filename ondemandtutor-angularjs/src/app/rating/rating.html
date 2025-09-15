@@ -1,0 +1,41 @@
+<div class="rating-page">
+  <div class="rating-container">
+    <h2>Đánh giá Gia Sư</h2>
+
+    <!-- Đang kiểm tra -->
+    <div *ngIf="canRate === null" class="info-box">
+      <p>⏳ Đang kiểm tra quyền đánh giá...</p>
+    </div>
+
+    <!-- Không đủ điều kiện -->
+    <div *ngIf="canRate === false" class="info-box">
+      <p>⚠️ Bạn cần đặt lịch với gia sư này trước khi đánh giá.</p>
+      <a class="btn-book" [routerLink]="['/booking', tutorUserId]">📅 Đặt lịch ngay</a>
+    </div>
+
+    <!-- Đủ điều kiện -->
+    <form *ngIf="canRate === true" (ngSubmit)="submit()">
+      <label>Chọn số sao:</label>
+      <div class="stars" id="star-group" aria-label="Chọn số sao">
+        <span *ngFor="let s of stars"
+              (click)="pick(s)"
+              [class.selected]="s <= selected"
+              role="button"
+              tabindex="0"
+              (keyup.enter)="pick(s)"
+              [attr.aria-label]="s + ' sao'">&#9733;</span>
+      </div>
+
+      <label for="comment">Nhận xét:</label>
+      <textarea id="comment" rows="4"
+                [(ngModel)]="comment" name="comment" required
+                placeholder="Viết nhận xét của bạn..."></textarea>
+
+      <button type="submit" [disabled]="disabled">
+        {{ busy ? 'Đang gửi...' : 'Gửi đánh giá' }}
+      </button>
+    </form>
+
+    <p [style.color]="color" role="status">{{ msg }}</p>
+  </div>
+</div>

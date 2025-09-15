@@ -6,7 +6,7 @@ import { UserService, UserProfile } from '../core/user.service';
 @Component({
   selector: 'app-tutor-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule],  
   templateUrl: './tutor_profile.html',
   styleUrls: ['./tutor_profile.css']
 })
@@ -31,9 +31,9 @@ export class TutorProfileComponent implements OnInit {
       this.isLoading = true;
       this.userService.getUserById(userId).subscribe({
         next: (res: any) => {
+          this.tutor = res?.result ?? res;
           console.log('User API raw:', res);
           const u = res?.result ?? res;
-
 
           // // lấy danh sách file fake trong localStorage
            const stored = localStorage.getItem(`promoFiles_user_${userId}`);
@@ -44,7 +44,6 @@ export class TutorProfileComponent implements OnInit {
              ...u,
              promoFiles: fakeUrls.length > 0 ? fakeUrls : (u?.promoFiles ?? [])
            };
-
           this.isLoading = false;
         },
         error: (err) => {
